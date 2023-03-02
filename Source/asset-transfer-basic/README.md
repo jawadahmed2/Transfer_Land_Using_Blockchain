@@ -36,7 +36,7 @@ Note that the asset transfer implemented by the smart contract is a simplified s
 
 The Fabric land network is used to deploy and run this sample. Follow these steps in order:
 
-1. Create the test network and a channel (from the `test-network` folder).
+1. Create the test network and a channel (from the `land-network` folder).
    ```
    ./network.sh up createChannel -c mychannel -ca
    ```
@@ -49,18 +49,11 @@ The Fabric land network is used to deploy and run this sample. Follow these step
 
 1. Run the application (from the `asset-transfer-basic` folder).
    ```
-   # To run the Typescript sample application
-   cd application-gateway-typescript
+   # To run the node sample application
+   cd application-gateway-javascript
    npm install
    npm start
 
-   # To run the Go sample application
-   cd application-gateway-go
-   go run .
-
-   # To run the Java sample application
-   cd application-gateway-java
-   ./gradlew run
    ```
 
 ## Clean up
