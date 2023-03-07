@@ -10,5 +10,4 @@ node_modules/
 jspm_packages/
 package-lock.json
 
-wallet
-!wallet/.gitkeep
+
