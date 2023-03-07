@@ -1,27 +1,111 @@
-<h1 class="title">
-    Sign In
-</h1>
-<%if(errors.length> 0) {%>
-    <div class="alert alert-danger">
-        <%=errors%>
-    </div>
-    <%}%>
-        <div class="form-center">
-            <form action="/login_form" method="POST" class="needs-validation col-6"
-                style="padding-left: 70px; font-size: 20px; margin-bottom: 50px;" novalidate>
-                <div class="form-group">
-                    <input type="text" class="form-control" name="userId" required placeholder="User Id">
-                    <div class="invalid-feedback">
-                        Please enter your id
-                    </div>
-                    <input type="text" class="form-control" name="pw" required placeholder="Password"
-                        style="margin-top: 10px;">
-                    <div class="invalid-feedback">
-                        Please enter your password
-                    </div>
-                </div>
-                <div class="form-group">
-                    <input type="submit" class="btn btn-primary col-md-12" value="Sign In">
-                </div>
-            </form>
-        </div>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<title>Login</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!--===============================================================================================-->
+	<link rel="icon" type="image/png" href="login_stylesheet/images/icons/favicon.ico" />
+	<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="login_stylesheet/vendor/bootstrap/css/bootstrap.min.css">
+	<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="login_stylesheet/fonts/font-awesome-4.7.0/css/font-awesome.min.css">
+	<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="login_stylesheet/fonts/iconic/css/material-design-iconic-font.min.css">
+	<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="login_stylesheet/vendor/animate/animate.css">
+	<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="login_stylesheet/vendor/css-hamburgers/hamburgers.min.css">
+	<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="login_stylesheet/vendor/animsition/css/animsition.min.css">
+	<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="login_stylesheet/vendor/select2/select2.min.css">
+	<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="login_stylesheet/vendor/daterangepicker/daterangepicker.css">
+	<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="login_stylesheet/css/util.css">
+	<link rel="stylesheet" type="text/css" href="login_stylesheet/css/main.css">
+	<!--===============================================================================================-->
+</head>
+
+<body>
+	<div class="container" style="margin-top: -5%;">
+		<div class="limiter">
+			<div class="container-login100">
+				<div class="wrap-login100 p-l-55 p-r-55 p-t-65 p-b-54">
+					<form class="login100-form validate-form">
+						<span class="login100-form-title p-b-49">
+							Login
+						</span>
+
+						<div class="wrap-input100 validate-input m-b-23" data-validate="Username is reauired">
+							<span class="label-input100">Username</span>
+							<input class="input100" type="text" name="username" placeholder="Type your username">
+							<span class="focus-input100" data-symbol="&#xf206;"></span>
+						</div>
+
+						<div class="wrap-input100 validate-input" data-validate="Password is required">
+							<span class="label-input100">Password</span>
+							<input class="input100" type="password" name="pass" placeholder="Type your password">
+							<span class="focus-input100" data-symbol="&#xf190;"></span>
+						</div>
+
+						<div class="text-right p-t-8 p-b-31">
+							<a href="#">
+								Forgot password?
+							</a>
+						</div>
+
+						<div class="container-login100-form-btn">
+							<div class="wrap-login100-form-btn">
+								<div class="login100-form-bgbtn"></div>
+								<button class="login100-form-btn">
+									Login
+								</button>
+							</div>
+						</div>
+
+						<div class="txt1 text-center p-t-54 p-b-20">
+							<span>
+								Or Sign Up Using
+							</span>
+						</div>
+
+						<div class="flex-c-m">
+							<a href="/register_user_form" class="txt2">
+								Sign Up
+							</a>
+
+						</div>
+
+
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<div id="dropDownSelect1"></div>
+
+	<!--===============================================================================================-->
+	<script src="login_stylesheet/vendor/jquery/jquery-3.2.1.min.js"></script>
+	<!--===============================================================================================-->
+	<script src="login_stylesheet/vendor/animsition/js/animsition.min.js"></script>
+	<!--===============================================================================================-->
+	<script src="login_stylesheet/vendor/bootstrap/js/popper.js"></script>
+	<script src="login_stylesheet/vendor/bootstrap/js/bootstrap.min.js"></script>
+	<!--===============================================================================================-->
+	<script src="login_stylesheet/vendor/select2/select2.min.js"></script>
+	<!--===============================================================================================-->
+	<script src="login_stylesheet/vendor/daterangepicker/moment.min.js"></script>
+	<script src="login_stylesheet/vendor/daterangepicker/daterangepicker.js"></script>
+	<!--===============================================================================================-->
+	<script src="login_stylesheet/vendor/countdowntime/countdowntime.js"></script>
+	<!--===============================================================================================-->
+	<script src="login_stylesheet/js/main.js"></script>
+
+</body>
+
+</html>
