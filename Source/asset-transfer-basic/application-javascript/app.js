@@ -1,3 +1,12 @@
+/* eslint-disable linebreak-style */
+/* eslint-disable strict */
+/* eslint-disable linebreak-style */
+/* eslint-disable quotes */
+/* eslint-disable linebreak-style */
+/* eslint-disable indent */
+/* eslint-disable linebreak-style */
+// eslint-disable-next-line linebreak-style
+// eslint-disable-next-line linebreak-style
 /*
  * Copyright IBM Corp. All Rights Reserved.
  *
@@ -34,7 +43,7 @@ const layout = require('express-layout');
 const middleware=[
     layout(),
     express.static('public')
-]
+];
 app.use(middleware);
 
 // The Session and cookies are used by different websites for storing user's data across different pages
@@ -118,12 +127,12 @@ app.use('/',routes);
 
 // The home page of the application (index.html) is invoked using the render method.
 app.get('/', (req,res) => {
-    res.render('index')
-})
+    res.render('index');
+});
 
 
 // To make our server actually run we use app.listen. We pass in it a port number.
 // This app starts a server and listens on port 3001 for connections.
 app.listen(3001,function(){
     console.log("Server started on Port 3001");
-})
+});

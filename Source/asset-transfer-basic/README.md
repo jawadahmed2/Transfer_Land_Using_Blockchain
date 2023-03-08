@@ -37,17 +37,20 @@ Note that the asset transfer implemented by the smart contract is a simplified s
 The Fabric land network is used to deploy and run this sample. Follow these steps in order:
 
 1. Create the test network and a channel (from the `land-network` folder).
+
    ```
    ./network.sh up createChannel -c mychannel -ca
    ```
 
 1. Deploy javascript smart contract implementations (from the `land-network` folder).
+
    ```
      # To deploy the Java chaincode implementation
    ./network.sh deployCC -ccn basic -ccp ../asset-transfer-basic/chaincode-javascript/ -ccl javascript
    ```
 
 1. Run the application (from the `asset-transfer-basic` folder).
+
    ```
    # To run the node sample application
    cd application-gateway-javascript
