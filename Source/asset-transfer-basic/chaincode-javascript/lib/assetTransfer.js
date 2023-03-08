@@ -17,46 +17,46 @@ class AssetTransfer extends Contract {
     async InitLedger(ctx) {
         const assets = [
             {
-                ID: 'asset1',
-                Color: 'blue',
-                Size: 5,
-                Owner: 'Tomoko',
-                AppraisedValue: 300,
+                LandID: 'land1',
+                Address: 'Kohat',
+                LandSize: 500 * 400,
+                Owner: 'Jawad',
+                Price: 800000,
             },
             {
-                ID: 'asset2',
-                Color: 'red',
-                Size: 5,
-                Owner: 'Brad',
-                AppraisedValue: 400,
+                LandID: 'land2',
+                Address: 'Harapa',
+                LandSize: 800 * 500,
+                Owner: 'Zubair',
+                Price: 1000000,
             },
             {
-                ID: 'asset3',
-                Color: 'green',
-                Size: 10,
-                Owner: 'Jin Soo',
-                AppraisedValue: 500,
+                LandID: 'land3',
+                Address: 'Multan',
+                LandSize: 400 * 800,
+                Owner: 'Sharjeel',
+                Price: 700000,
             },
             {
-                ID: 'asset4',
-                Color: 'yellow',
-                Size: 10,
-                Owner: 'Max',
-                AppraisedValue: 600,
+                LandID: 'land4',
+                Address: 'Hyderabad',
+                LandSize: 900 * 700,
+                Owner: 'Danish',
+                Price: 1200000,
             },
             {
-                ID: 'asset5',
-                Color: 'black',
-                Size: 15,
-                Owner: 'Adriana',
-                AppraisedValue: 700,
+                LandID: 'land5',
+                Address: 'Sahiwal',
+                LandSize: 550 * 650,
+                Owner: 'Hammad',
+                Price: 1100000,
             },
             {
-                ID: 'asset6',
-                Color: 'white',
-                Size: 15,
-                Owner: 'Michel',
-                AppraisedValue: 800,
+                LandID: 'land6',
+                Address: 'Kohat',
+                LandSize: 750 * 550,
+                Owner: 'Anas',
+                Price: 780000,
             },
         ];
 
@@ -73,24 +73,24 @@ class AssetTransfer extends Contract {
             // use convetion of alphabetic order
             // we insert data in alphabetic order using 'json-stringify-deterministic' and 'sort-keys-recursive'
             // when retrieving data, in any lang, the order of data will be the same and consequently also the corresonding hash
-            await ctx.stub.putState(asset.ID, Buffer.from(stringify(sortKeysRecursive(asset))));
-            console.log(`Asset ${asset.ID} initialized`);
+            await ctx.stub.putState(asset.LandID, Buffer.from(stringify(sortKeysRecursive(asset))));
+            console.log(`Asset ${asset.LandID} initialized`);
         }
     }
 
     // CreateAsset issues a new asset to the world state with given details.
-    async CreateAsset(ctx, id, color, size, owner, appraisedValue, filepath) {
+    async CreateAsset(ctx, id, Address, LandSize, owner, price, filepath) {
         const exists = await this.AssetExists(ctx, id);
         if (exists) {
             throw new Error(`The asset ${id} already exists`);
         }
 
         const asset = {
-            ID: id,
-            Color: color,
-            Size: size,
+            LandID: id,
+            Address: Address,
+            LandSize: LandSize,
             Owner: owner,
-            AppraisedValue: appraisedValue,
+            Price: price,
         };
 
         asset.docType = 'asset';
@@ -117,7 +117,7 @@ class AssetTransfer extends Contract {
         return assetJSON.toString();
     }
 
-    // A common use of JSON is to exchange data to/from a web server. JSON parsing is the process of 
+    // A common use of JSON is to exchange data to/from a web server. JSON parsing is the process of
     // converting a JSON object in text format to a Javascript object that can be used inside a program.
     // JSON object literals are surrounded by curly braces {}.
     // JSON object literals contains key/value pairs.
@@ -138,7 +138,7 @@ class AssetTransfer extends Contract {
     }
 
     // UpdateAsset updates an existing asset in the world state with provided parameters.
-    async UpdateAsset(ctx, id, color, size, owner, appraisedValue, filepath) {
+    async UpdateAsset(ctx, id, Address, LandSize, owner, price, filepath) {
         const exists = await this.AssetExists(ctx, id);
         if (!exists) {
             throw new Error(`The asset ${id} does not exist`);
@@ -151,18 +151,18 @@ class AssetTransfer extends Contract {
 
         // overwriting original asset with new asset
         const updatedAsset = {
-            ID: id,
-            Color: color,
-            Size: size,
+            LandID: id,
+            Address: Address,
+            LandSize: LandSize,
             Owner: owner,
-            AppraisedValue: appraisedValue,
+            Price: price,
             docType: 'asset',
             addedOn: today,
             filePath: filepath,
         };
         // we insert data in alphabetic order using 'json-stringify-deterministic' and 'sort-keys-recursive'
-        // ctx.stub is used to access APIs that provide a broad range of transaction processing operations 
-        // from putState() and getState() to access the ledger, to getTxID() to retrieve the current 
+        // ctx.stub is used to access APIs that provide a broad range of transaction processing operations
+        // from putState() and getState() to access the ledger, to getTxID() to retrieve the current
         // transaction ID.
         // The Buffer.from() method creates a new buffer filled with the specified string, array, or buffer.
         // var buf = Buffer.from('abc');
@@ -171,14 +171,14 @@ class AssetTransfer extends Contract {
     }
 
     // DeleteAsset deletes a given asset from the world state.
-    // There is a state database that stores keys and their values. This is different from the sequence of 
-    // blocks that make up the blockchain. A key and its associated value can be removed from the state 
-    // database using the DelState function. However, this does not mean that there is an alteration of blocks 
-    // on the blockchain. The removal of a key and value would be stored as a transaction on the blockchain 
+    // There is a state database that stores keys and their values. This is different from the sequence of
+    // blocks that make up the blockchain. A key and its associated value can be removed from the state
+    // database using the DelState function. However, this does not mean that there is an alteration of blocks
+    // on the blockchain. The removal of a key and value would be stored as a transaction on the blockchain
     // just as the prior addition and any modifications were stored as transactions on the blockchain.
-    // The history of a key can be retrieved after the key is deleted. There is a GetHistoryForKey() API that 
+    // The history of a key can be retrieved after the key is deleted. There is a GetHistoryForKey() API that
     // retrieves the history and part of its response is an IsDeleted flag that indicates if the key was deleted.
-    // It would be possible to create a key, delete the key, and then create the key again; the 
+    // It would be possible to create a key, delete the key, and then create the key again; the
     // GetHistoryForKey() API would track such a case.
     // The state database stores the current state, so the key and its value are deleted from the state database.
     // The GetHistoryForKey() API reviews the chain history and not the state database to find prior key values.

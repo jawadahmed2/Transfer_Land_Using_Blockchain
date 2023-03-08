@@ -917,7 +917,7 @@ router.post('/register_user', function(req,res){
 				if (userIdentity) {
 					console.log(`An identity for the user ${org1UserId} already exists in the wallet`);
 				}
-				await registerAndEnrollUser(caClient, wallet, mspOrg1, org1UserId, 'org1.department1', req.body.role);
+				await registerAndEnrollUser(caClient, wallet, mspOrg1, org1UserId, 'org1.department1', req.body.role, req.body.username, req.body.password);
 			} catch (error) {
 				console.error(`******** FAILED to run the application: ${error}`);
 			}
