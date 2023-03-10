@@ -2,38 +2,54 @@
     All Assets Info
 </h1>
 <%# Tabular Display%>
-<div style="width: 100%">
+<div style=" width: 100%;">
     <table class="table">
         <thead>
             <tr>
-                <th>Appraised Value</th>
-                <th>Color</th>
-                <th>ID</th>
+                <th>LandID</th>
                 <th>Owner</th>
-                <th>Size</th>
+                <th>Address</th>
+                <th>LandSize</th>
+                <th>Price</th>
                 <th>Date</th>
                 <th>Type</th>
-                <th>Image</th>
+                <th>Documents</th>
             </tr>
         </thead>
-        <tbody>
-            <%k=0%>
-            <%for(var i=0; i < (label.length/8+1); i++){%>
-                <%if(i>0){%>
-                    <tr>
-                        <%for(var j=0; j < 8; j++){%>
-                            <%if(j < 7){%>
-                                <td><%=values[k]%></td>
-                                <%k=k+1%>
-                            <%} else {%>
-                                <td><a href="https://land-management-system.infura-ipfs.io/ipfs/<%=values[k]%>" style="color: white" target="_blank">View</a></td>
-                                <%k=k+1%>
-                            <%}%>
-                        <%}%>
-                    </tr>
-                <%}%>
-            <%}%>
-        </tbody>
-    </table>
-</div>
 
+        <tbody>
+
+            <%k=0%>
+                <%for(var i=0; i < (values.length/8); i++){%>
+                    <tr>
+                        <td>
+                            <%=values[1 + k]%>
+                        </td>
+                        <td>
+                            <%=values[3 + k]%>
+                        </td>
+                        <td>
+                            <%=values[0 + k]%>
+                        </td>
+                        <td>
+                            <%=values[2 + k]%> feetSquare
+                        </td>
+                        <td>
+                            <%=values[4 + k]%> Rupees
+                        </td>
+                        <td>
+                            <%=values[5 + k]%>
+                        </td>
+                        <td>
+                            <%=values[6 + k]%>
+                        </td>
+                        <td>
+                            <%=values[7 + k]%>
+                        </td>
+                    </tr>
+                    <%k=k+8%>
+                        <%}%>
+        </tbody>
+
+    </table>
+    </div>
