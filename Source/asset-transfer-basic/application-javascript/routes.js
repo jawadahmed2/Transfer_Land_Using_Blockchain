@@ -302,8 +302,8 @@ router.post('/create_asset', function(req,res){
 						const fs = require('fs');
 						const create = require('ipfs-http-client');
 						// Details about project id and project secret are provided in the book
-						const projectId = 'Enter your infura project id here';
-						const projectSecret = 'Enter your infura API Key Secret here';
+						const projectId = '2JuAPHltL4jX6CKKvvzejOyO15K';
+						const projectSecret = '1b623e021ab46f73b445a94564557f12';
 						const projectIdAndSecret = `${projectId}:${projectSecret}`;
 						const ipfsClient = create({
 							host: 'ipfs.infura.io',
@@ -447,8 +447,8 @@ router.post('/update_asset', function(req,res){
 					try {
 						const fs = require('fs');
 						const create = require('ipfs-http-client');
-						const projectId = 'Enter your infura project id here';
-						const projectSecret = 'Enter your infura API Key Secret here';
+						const projectId = '2JuAPHltL4jX6CKKvvzejOyO15K';
+						const projectSecret = '1b623e021ab46f73b445a94564557f12';
 						const projectIdAndSecret = `${projectId}:${projectSecret}`;
 						const ipfsClient = create({
 							host: 'ipfs.infura.io',
@@ -918,6 +918,8 @@ router.post('/register_user', function(req,res){
 					console.log(`An identity for the user ${org1UserId} already exists in the wallet`);
 				}
 				await registerAndEnrollUser(caClient, wallet, mspOrg1, org1UserId, 'org1.department1', req.body.role, req.body.username, req.body.password);
+				console.log(req.body.role, req.body.username, req.body.password);
+
 			} catch (error) {
 				console.error(`******** FAILED to run the application: ${error}`);
 			}

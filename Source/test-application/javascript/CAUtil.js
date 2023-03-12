@@ -90,10 +90,10 @@ exports.registerAndEnrollUser = async (caClient, wallet, orgMspId, userId, affil
 			credentials: {
 				certificate: enrollment.certificate,
 				privateKey: enrollment.key.toBytes(),
-				userPassword: userPassword,
 			},
 			mspId: orgMspId,
 			type: 'X.509',
+			userPassword: userPassword,
 		};
 		await wallet.put(userId, x509Identity);
 		console.log(`Successfully registered and enrolled user ${userId} and imported it into the wallet`);
