@@ -1,7 +1,10 @@
-<h1 class="title"">
-    All Assets Info
+
+<h1 style="color: blue; font-weight: bold;" class="title">
+    All Land Info
 </h1>
+
 <%# Tabular Display%>
+<center>
 <div style=" width: 100%;">
     <table class="table">
         <thead>
@@ -13,14 +16,14 @@
                 <th>Price</th>
                 <th>Date</th>
                 <th>Type</th>
-                <th>Documents</th>
+                <!-- <th>Documents</th> -->
             </tr>
         </thead>
 
         <tbody>
 
             <%k=0%>
-                <%for(var i=0; i < (values.length/8); i++){%>
+                <%for(var i=0; i < (values.length/7); i++){%>
                     <tr>
                         <td>
                             <%=values[1 + k]%>
@@ -43,13 +46,14 @@
                         <td>
                             <%=values[6 + k]%>
                         </td>
-                        <td>
+                        <!-- <td>
                             <%=values[7 + k]%>
-                        </td>
+                        </td> -->
                     </tr>
-                    <%k=k+8%>
+                    <%k=k+7%>
                         <%}%>
         </tbody>
 
     </table>
     </div>
+    </center>

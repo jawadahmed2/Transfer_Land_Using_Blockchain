@@ -68,7 +68,8 @@ class AssetTransfer extends Contract {
             var yyyy = today.getFullYear();
             today = mm + '/' + dd + '/' + yyyy;
             asset.addedOn = today;  // a date type column named "added"
-            asset.filePath = 'xyz';
+            // asset.filePath = 'xyz';
+
             // example of how to write to world state deterministically
             // use convetion of alphabetic order
             // we insert data in alphabetic order using 'json-stringify-deterministic' and 'sort-keys-recursive'
@@ -79,7 +80,7 @@ class AssetTransfer extends Contract {
     }
 
     // CreateAsset issues a new asset to the world state with given details.
-    async CreateAsset(ctx, id, Address, LandSize, owner, price, filepath) {
+    async CreateAsset(ctx, id, Address, LandSize, owner, price) { //filePath removed
         const exists = await this.AssetExists(ctx, id);
         if (exists) {
             throw new Error(`The asset ${id} already exists`);
@@ -100,7 +101,7 @@ class AssetTransfer extends Contract {
         var yyyy = today.getFullYear();
         today = mm + '/' + dd + '/' + yyyy;
         asset.addedOn = today;
-        asset.filePath = filepath;
+        // asset.filePath = filepath;
 
         //we insert data in alphabetic order using 'json-stringify-deterministic' and 'sort-keys-recursive'
         await ctx.stub.putState(id, Buffer.from(stringify(sortKeysRecursive(asset))));
@@ -138,7 +139,7 @@ class AssetTransfer extends Contract {
     }
 
     // UpdateAsset updates an existing asset in the world state with provided parameters.
-    async UpdateAsset(ctx, id, Address, LandSize, owner, price, filepath) {
+    async UpdateAsset(ctx, id, Address, LandSize, owner, price) { //remove filePath
         const exists = await this.AssetExists(ctx, id);
         if (!exists) {
             throw new Error(`The asset ${id} does not exist`);
@@ -158,7 +159,7 @@ class AssetTransfer extends Contract {
             Price: price,
             docType: 'asset',
             addedOn: today,
-            filePath: filepath,
+            // filePath: filepath,
         };
         // we insert data in alphabetic order using 'json-stringify-deterministic' and 'sort-keys-recursive'
         // ctx.stub is used to access APIs that provide a broad range of transaction processing operations

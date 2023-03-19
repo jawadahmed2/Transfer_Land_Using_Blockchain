@@ -120,7 +120,7 @@ router.get('/display',function(req,res){
 					}
 				}
 
-				// Get Labels (Appraised Value, color, id and so on)
+				// Get Labels (Appraised Value, address, id and so on)
 				let string;
 				let j;
 				for (var i=0; i < data2.length; i++)
@@ -222,21 +222,21 @@ router.get('/insert_form', function(req,res){
 router.post('/create_asset', function(req,res){
 	let errors=[];
 	if(!req.body.id){
-		//console.log('Car ID is: '+req.body.id);
+		//console.log('Land ID is: '+req.body.id);
 		errors.push('ID must be provided');
 	}
-	if(!req.body.color){
-		errors.push('Color must be provided');
+	if(!req.body.address){
+		errors.push('Address must be provided');
 	}
 	if(!req.body.size){
-		errors.push('Size must be provided');
+		errors.push('Land Size must be provided');
 	}
 	if(!req.body.value){
-		errors.push('Value must be provided');
+		errors.push('Price must be provided');
 	}
-	if(!req.body.file){
-		errors.push('Select an image file to upload');
-	}
+	// if(!req.body.file){
+	// 	errors.push('Select an image file to upload');
+	// }
 	if(errors.length > 0)
 	{
 		res.render('insert_form',{
@@ -315,10 +315,10 @@ router.post('/create_asset', function(req,res){
 								)}`,
 							},
 						});
-						const file = fs.readFileSync(req.body.file);
-						const buffer = Buffer.from(file);
-						//console.log(buffer);
-						const cid = await ipfsClient.add(buffer);
+						// const file = fs.readFileSync(req.body.file);
+						// const buffer = Buffer.from(file);
+						// //console.log(buffer);
+						// const cid = await ipfsClient.add(buffer);
 						// Note: (node:75967) ExperimentalWarning: The Fetch API is an experimental feature. This feature could change at any time
 						// (Use `node --trace-warnings ...` to show where the warning was created)
 						// Remedy: Downgrade Node: nvm install 10.23.0 and nvm use 10.23.0
@@ -327,11 +327,11 @@ router.post('/create_asset', function(req,res){
 						// to the orderer to be committed by each of the peer's to the channel ledger.
 						for (const item of cid) {
 							console.log(JSON.stringify(item));
-							const filePath = JSON.stringify(item).substring(9,55);
-							console.log('Value of filePath is:',filePath);
-							console.log('\n--> Submit Transaction: CreateAsset, creates new asset with ID, color, owner, size, appraisedValue, date, type, and image arguments');
-							await contract.submitTransaction('CreateAsset', req.body.id, req.body.color, req.body.size, org1UserId, req.body.value, filePath);
-							return;
+							// const filePath = JSON.stringify(item).substring(9,55);
+							// console.log('Value of filePath is:',filePath);
+							console.log('\n--> Submit Transaction: CreateAsset, creates new asset with ID, address, owner, size, appraisedValue, date, type, and image arguments');
+							await contract.submitTransaction('CreateAsset', req.body.id, req.body.address, req.body.size, org1UserId, req.body.value); // remove filePath
+						 	return;
 						}
 					} finally {
 						// Disconnect from the gateway when the application is closing
@@ -366,8 +366,8 @@ router.post('/update_asset', function(req,res){
 	if(!req.body.id){
 		errors.push('ID must be provided');
 	}
-	if(!req.body.color){
-		errors.push('Color must be provided');
+	if(!req.body.address){
+		errors.push('Address must be provided');
 	}
 	if(!req.body.size){
 		errors.push('Size must be provided');
@@ -460,15 +460,15 @@ router.post('/update_asset', function(req,res){
 								)}`,
 							},
 						});
-						const file = fs.readFileSync(req.body.file);
-						const buffer = Buffer.from(file);
-						const cid = await ipfsClient.add(buffer);
+						// const file = fs.readFileSync(req.body.file);
+						// const buffer = Buffer.from(file);
+						// const cid = await ipfsClient.add(buffer);
 						for (const item of cid) {
 							console.log(JSON.stringify(item));
-							const filePath = JSON.stringify(item).substring(9,55);
-							console.log('Value of filePath is:',filePath);
+							// const filePath = JSON.stringify(item).substring(9,55);
+							// console.log('Value of filePath is:',filePath);
 							console.log('\n--> Submit Transaction: UpdateAsset, updates an existing asset');
-							await contract.submitTransaction('UpdateAsset', req.body.id, req.body.color, req.body.size, org1UserId, req.body.value, filePath);
+							await contract.submitTransaction('UpdateAsset', req.body.id, req.body.address, req.body.size, org1UserId, req.body.value); // remove filePath
 							return;
 						}
 					} finally {
@@ -663,15 +663,15 @@ router.post('/search_asset', function(req,res){
 						{
 							if (i==0)
 							{
-								label.push('Value');
+								label.push('Price');
 							}
 							if (i==1)
 							{
-								label.push('Color');
+								label.push('Address');
 							}
 							if (i==2)
 							{
-								label.push('Asset ID');
+								label.push('LandID');
 							}
 							if (i==3)
 							{
@@ -679,7 +679,7 @@ router.post('/search_asset', function(req,res){
 							}
 							if (i==4)
 							{
-								label.push('Size');
+								label.push('LandSize');
 							}
 							if (i==5)
 							{
@@ -689,10 +689,10 @@ router.post('/search_asset', function(req,res){
 							{
 								label.push('Type');
 							}
-							if (i==7)
-							{
-								label.push('Image');
-							}
+							// if (i==7)
+							// {
+							// 	label.push('Image');
+							// }
 						}
 
 						// Get Values (CAR0, Toyota, Prius, blue, Tomoko)
