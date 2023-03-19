@@ -325,14 +325,14 @@ router.post('/create_asset', function(req,res){
 						// Now let's try to submit a transaction.
 						// This will be sent to both peers and if both peers endorse the transaction, the endorsed proposal will be sent
 						// to the orderer to be committed by each of the peer's to the channel ledger.
-						for (const item of cid) {
-							console.log(JSON.stringify(item));
-							// const filePath = JSON.stringify(item).substring(9,55);
-							// console.log('Value of filePath is:',filePath);
-							console.log('\n--> Submit Transaction: CreateAsset, creates new asset with ID, address, owner, size, appraisedValue, date, type, and image arguments');
-							await contract.submitTransaction('CreateAsset', req.body.id, req.body.address, req.body.size, org1UserId, req.body.value); // remove filePath
+						// for (const item of cid) {
+						// console.log(JSON.stringify(item));
+						// const filePath = JSON.stringify(item).substring(9,55);
+						// console.log('Value of filePath is:',filePath);
+						console.log('\n--> Submit Transaction: CreateAsset, creates new asset with ID, address, owner, size, price, date, type, and image arguments');
+						await contract.submitTransaction('CreateAsset', req.body.id, req.body.address, req.body.size, org1UserId, req.body.value); // remove filePath
 						 	return;
-						}
+						// }
 					} finally {
 						// Disconnect from the gateway when the application is closing
 						// This will close all connections to the network
@@ -463,14 +463,14 @@ router.post('/update_asset', function(req,res){
 						// const file = fs.readFileSync(req.body.file);
 						// const buffer = Buffer.from(file);
 						// const cid = await ipfsClient.add(buffer);
-						for (const item of cid) {
-							console.log(JSON.stringify(item));
-							// const filePath = JSON.stringify(item).substring(9,55);
-							// console.log('Value of filePath is:',filePath);
-							console.log('\n--> Submit Transaction: UpdateAsset, updates an existing asset');
-							await contract.submitTransaction('UpdateAsset', req.body.id, req.body.address, req.body.size, org1UserId, req.body.value); // remove filePath
-							return;
-						}
+						// for (const item of cid) {
+						// console.log(JSON.stringify(item));
+						// const filePath = JSON.stringify(item).substring(9,55);
+						// console.log('Value of filePath is:',filePath);
+						console.log('\n--> Submit Transaction: UpdateAsset, updates an existing asset');
+						await contract.submitTransaction('UpdateAsset', req.body.id, req.body.address, req.body.size, org1UserId, req.body.value); // remove filePath
+						return;
+						// }
 					} finally {
 						// Disconnect from the gateway when the application is closing
 						// This will close all connections to the network
