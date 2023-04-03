@@ -903,6 +903,23 @@ router.post('/register_user', function(req,res){
 		const mspOrg1 = 'Org1MSP';
 		const walletPath = path.join(__dirname, 'wallet');
 		const org1UserId = req.body.userId;
+		const mysql = require('mysql');
+		const connection = mysql.createConnection({
+			host: 'localhost',
+			user: 'root@localhost',
+			password: '',
+			database: 'user',
+		  });
+
+		  connection.connect((err) => {
+			if (err) {
+			  console.error('Error connecting to MySQL server: ' + err.stack);
+			  return;
+			}
+			console.log('Connected to MySQL server.');
+		  });
+
+
 
 		function prettyJSONString(inputString) {
 			return JSON.stringify(JSON.parse(inputString), null, 2);
@@ -917,7 +934,7 @@ router.post('/register_user', function(req,res){
 				if (userIdentity) {
 					console.log(`An identity for the user ${org1UserId} already exists in the wallet`);
 				}
-				await registerAndEnrollUser(caClient, wallet, mspOrg1, org1UserId, 'org1.department1', req.body.role, req.body.username, req.body.password);
+				await registerAndEnrollUser(caClient, wallet, mspOrg1, org1UserId, 'org1.department1', req.body.role, req.body.username, req.body.cnic, req.body.email, req.body.mobile ,req.body.password);
 				console.log(req.body.role, req.body.username, req.body.password);
 
 			} catch (error) {
