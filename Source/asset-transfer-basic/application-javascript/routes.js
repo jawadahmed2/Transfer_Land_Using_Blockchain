@@ -923,7 +923,7 @@ router.post('/register_user', function(req,res){
 			} catch (error) {
 				console.error(`******** FAILED to run the application: ${error}`);
 			}
-			// try to connect with CSV
+			// try to connect with SQL
 
 			// try {
 			// 	const fs = require("fs");
