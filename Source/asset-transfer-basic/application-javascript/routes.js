@@ -1096,20 +1096,20 @@ router.get('/login_form', function (req, res) {
 	const mysql = require('mysql');
 		//Create Connections
 
-		const db = mysql.createConnection({
-			host: 'localhost',
-			user: 'root',
-			password: '',
-			database: 'user',
-		});
+		// const db = mysql.createConnection({
+		// 	host: 'localhost',
+		// 	user: 'root',
+		// 	password: '',
+		// 	database: 'user',
+		// });
 
 		//connect to database
-		db.connect((err) => {
-			if (err) {
-				throw err;
-			}
-			console.log('Connection done');
-		});
+		// db.connect((err) => {
+		// 	if (err) {
+		// 		throw err;
+		// 	}
+		// 	console.log('Connection done');
+		// });
 
 });
 router.post('/login_form', function (req, res) {
