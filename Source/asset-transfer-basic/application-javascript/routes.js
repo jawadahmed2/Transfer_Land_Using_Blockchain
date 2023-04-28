@@ -1,4 +1,6 @@
 /* eslint-disable linebreak-style */
+/* eslint-disable indent */
+/* eslint-disable linebreak-style */
 /* eslint-disable no-mixed-spaces-and-tabs */
 /* eslint-disable no-undef */
 /* eslint-disable no-unused-vars */
@@ -7,10 +9,10 @@
 /* eslint-disable eqeqeq */
 /* eslint-disable no-var */
 /* eslint-disable strict */
-//var path=require('path')
+//var path=require('path')S
 
-const express=require('express');
-const router=express.Router();
+const express = require('express');
+const router = express.Router();
 
 // The router object is used in web applications to handle requests.
 // router.post() refers to POST requests and router.get() referes to GET request.
@@ -20,7 +22,7 @@ const router=express.Router();
 // and when you submit that form it's a POST request as your inputted data will be processed and assorted into
 // a database, etc.
 
-router.get('/display',function(req,res){
+router.get('/display', function (req, res) {
 	// The purpose of "use strict" is to indicate that the code should be executed in "strict mode".
 	// With strict mode, you cannot, for example, use undeclared variables.
 	'use strict';
@@ -53,9 +55,9 @@ router.get('/display',function(req,res){
 
 	async function main() {
 		try {
-			if(org1UserId === undefined){
-				res.render('login_form',{
-					errors:'Please log in to see list of assets.'
+			if (org1UserId === undefined) {
+				res.render('login_form', {
+					errors: 'Please log in to see list of assets.'
 				});
 				return;
 			}
@@ -105,16 +107,14 @@ router.get('/display',function(req,res){
 				let result = await contract.evaluateTransaction('GetAllAssets');
 				console.log(`*** Result: ${prettyJSONString(result.toString())}`);
 
-				let data=result.toString();
+				let data = result.toString();
 				console.log(data);
-				let data2=[];
-				let label=[];
-				let values=[];
+				let data2 = [];
+				let label = [];
+				let values = [];
 				// remove {} [] "" from the fetched dataset
-				for(var i=0;i<data.length;i++)
-				{
-					if(data[i]!='{' && data[i]!='}' && data[i]!='{' && data[i]!='"' && data[i]!='[' && data[i]!=']')
-					{
+				for (var i = 0; i < data.length; i++) {
+					if (data[i] != '{' && data[i] != '}' && data[i] != '{' && data[i] != '"' && data[i] != '[' && data[i] != ']') {
 						data2.push(data[i]);
 						//console.log(data[i]); // removes {} [] ""
 					}
@@ -123,26 +123,20 @@ router.get('/display',function(req,res){
 				// Get Labels (Appraised Value, address, id and so on)
 				let string;
 				let j;
-				for (var i=0; i < data2.length; i++)
-				{
-					string='';
-					if (i==0 || data2[i]==',')
-					{
+				for (var i = 0; i < data2.length; i++) {
+					string = '';
+					if (i == 0 || data2[i] == ',') {
 						// Eliminite the word 'Record' from the result
-						if(data2[i+1]=='R' && data2[i+2]=='e' && data2[i+3]=='c' && data2[i+4]=='o' && data2[i+5]=='r' && data2[i+6]=='d')
-						{
-							i+=7;
+						if (data2[i + 1] == 'R' && data2[i + 2] == 'e' && data2[i + 3] == 'c' && data2[i + 4] == 'o' && data2[i + 5] == 'r' && data2[i + 6] == 'd') {
+							i += 7;
 						}
-						if (i==0)
-						{
-							j=i;
+						if (i == 0) {
+							j = i;
 						}
-						else
-						{
-							j=i+1;
+						else {
+							j = i + 1;
 						}
-						while(data2[j] != ':')
-						{
+						while (data2[j] != ':') {
 							string += data2[j];
 							j++;
 						}
@@ -152,32 +146,25 @@ router.get('/display',function(req,res){
 					}
 				}
 				// Get Values (300, blue, asset1 and so on)
-				for(var i=0; i < data2.length; i++)
-				{
-					string='';
-					if(data2[i]==':')
-					{
+				for (var i = 0; i < data2.length; i++) {
+					string = '';
+					if (data2[i] == ':') {
 						// Remove text 'x509::CN='
-						if(data2[i+1]=='x' && data2[i+2]=='5' && data2[i+3]=='0' && data2[i+4]=='9' && data2[i+5]==':' && data2[i+6]==':' && data2[i+7]=='C' && data2[i+8]=='N' && data2[i+9]=='=')
-						{
+						if (data2[i + 1] == 'x' && data2[i + 2] == '5' && data2[i + 3] == '0' && data2[i + 4] == '9' && data2[i + 5] == ':' && data2[i + 6] == ':' && data2[i + 7] == 'C' && data2[i + 8] == 'N' && data2[i + 9] == '=') {
 							i += 9;
 						}
 						// Remove text ':CN=ca.org1.example.com'
-						if(data2[i+1]==':' && data2[i+2]=='C' && data2[i+3]=='N' && data2[i+4]=='=' && data2[i+5]=='c' && data2[i+6]=='a' && data2[i+7]=='.' && data2[i+8]=='o' && data2[i+9]=='r' && data2[i+10]=='g' && data2[i+11]=='1' && data2[i+12]=='.' && data2[i+13]=='e' && data2[i+14]=='x' && data2[i+15]=='a' && data2[i+16]=='m' && data2[i+17]=='p' && data2[i+18]=='l' && data2[i+19]=='e' && data2[i+20]=='.' && data2[i+21]=='c' && data2[i+22]=='o' && data2[i+23]=='m')
-						{
+						if (data2[i + 1] == ':' && data2[i + 2] == 'C' && data2[i + 3] == 'N' && data2[i + 4] == '=' && data2[i + 5] == 'c' && data2[i + 6] == 'a' && data2[i + 7] == '.' && data2[i + 8] == 'o' && data2[i + 9] == 'r' && data2[i + 10] == 'g' && data2[i + 11] == '1' && data2[i + 12] == '.' && data2[i + 13] == 'e' && data2[i + 14] == 'x' && data2[i + 15] == 'a' && data2[i + 16] == 'm' && data2[i + 17] == 'p' && data2[i + 18] == 'l' && data2[i + 19] == 'e' && data2[i + 20] == '.' && data2[i + 21] == 'c' && data2[i + 22] == 'o' && data2[i + 23] == 'm') {
 							i += 24;
 						}
 						// Remove O=org1.example.com
-						if(data2[i+1]=='O' && data2[i+2]=='=' && data2[i+3]=='o' && data2[i+4]=='r' && data2[i+5]=='g' && data2[i+6]=='1' && data2[i+7]=='.' && data2[i+8]=='e' && data2[i+9]=='x' && data2[i+10]=='a' && data2[i+11]=='m' && data2[i+12]=='p' && data2[i+13]=='l' && data2[i+14]=='e' && data2[i+15]=='.' && data2[i+16]=='c' && data2[i+17]=='o' && data2[i+18]=='m')
-						{
+						if (data2[i + 1] == 'O' && data2[i + 2] == '=' && data2[i + 3] == 'o' && data2[i + 4] == 'r' && data2[i + 5] == 'g' && data2[i + 6] == '1' && data2[i + 7] == '.' && data2[i + 8] == 'e' && data2[i + 9] == 'x' && data2[i + 10] == 'a' && data2[i + 11] == 'm' && data2[i + 12] == 'p' && data2[i + 13] == 'l' && data2[i + 14] == 'e' && data2[i + 15] == '.' && data2[i + 16] == 'c' && data2[i + 17] == 'o' && data2[i + 18] == 'm') {
 							i += 18;
 						}
 
 						j = i + 1;
-						while(data2[j] != ',')
-						{
-							if(j==data2.length-1)
-							{
+						while (data2[j] != ',') {
+							if (j == data2.length - 1) {
 								string += data2[j];
 								break;
 							}
@@ -193,9 +180,9 @@ router.get('/display',function(req,res){
 				}
 
 				// Call display.ejs file to show the list of assets
-				res.render('display',{
+				res.render('display', {
 					label: label,
-					values:values
+					values: values
 				});
 
 			} finally {
@@ -211,41 +198,39 @@ router.get('/display',function(req,res){
 });
 
 
-router.get('/insert_form', function(req,res){
-	res.render('insert_form',{
-		errors:{},
-		success:{}
+router.get('/insert_form', function (req, res) {
+	res.render('insert_form', {
+		errors: {},
+		success: {}
 	});
 });
 
 // Server-side validations
-router.post('/create_asset', function(req,res){
-	let errors=[];
-	if(!req.body.id){
+router.post('/create_asset', function (req, res) {
+	let errors = [];
+	if (!req.body.id) {
 		//console.log('Land ID is: '+req.body.id);
 		errors.push('ID must be provided');
 	}
-	if(!req.body.address){
+	if (!req.body.address) {
 		errors.push('Address must be provided');
 	}
-	if(!req.body.size){
+	if (!req.body.size) {
 		errors.push('Land Size must be provided');
 	}
-	if(!req.body.value){
+	if (!req.body.value) {
 		errors.push('Price must be provided');
 	}
 	// if(!req.body.file){
 	// 	errors.push('Select an image file to upload');
 	// }
-	if(errors.length > 0)
-	{
-		res.render('insert_form',{
-			errors:errors,
-			success:{}
+	if (errors.length > 0) {
+		res.render('insert_form', {
+			errors: errors,
+			success: {}
 		});
 	}
-	else
-	{
+	else {
 		'use strict';
 
 		const { Gateway, Wallets } = require('fabric-network');
@@ -262,10 +247,10 @@ router.post('/create_asset', function(req,res){
 
 		async function main() {
 			try {
-				if(org1UserId === undefined){
-					res.render('login_form',{
-						errors:'Please log in to add a new record.',
-						success:{}
+				if (org1UserId === undefined) {
+					res.render('login_form', {
+						errors: 'Please log in to add a new record.',
+						success: {}
 					});
 					return;
 				}
@@ -290,10 +275,10 @@ router.post('/create_asset', function(req,res){
 					const attrvalue = await contract.evaluateTransaction('getattributevalue');
 					console.log('The value of role attribute is:::::::::::' + attrvalue);
 
-					if(attrvalue != 'creator'){
-						res.render('insert_form',{
-							errors:'You do not possess the creator role to add a new record.',
-							success:{}
+					if (attrvalue != 'creator') {
+						res.render('insert_form', {
+							errors: 'You do not possess the creator role to add a new record.',
+							success: {}
 						});
 						return;
 					}
@@ -331,15 +316,15 @@ router.post('/create_asset', function(req,res){
 						// console.log('Value of filePath is:',filePath);
 						console.log('\n--> Submit Transaction: CreateAsset, creates new asset with ID, address, owner, size, price, date, type, and image arguments');
 						await contract.submitTransaction('CreateAsset', req.body.id, req.body.address, req.body.size, org1UserId, req.body.value); // remove filePath
-						 	return;
+						return;
 						// }
 					} finally {
 						// Disconnect from the gateway when the application is closing
 						// This will close all connections to the network
 						gateway.disconnect();
-						res.render('insert_form',{
-							errors:{},
-							success:'Asset record added successfully.'
+						res.render('insert_form', {
+							errors: {},
+							success: 'Asset record added successfully.'
 						});
 					}
 				} catch (error) {
@@ -353,37 +338,35 @@ router.post('/create_asset', function(req,res){
 	}
 });
 
-router.get('/update_form', function(req,res){
-	res.render('update_form',{
-		errors:{},
-		success:{}
+router.get('/update_form', function (req, res) {
+	res.render('update_form', {
+		errors: {},
+		success: {}
 	});
 });
 
 // Server-side validations
-router.post('/update_asset', function(req,res){
-	let errors=[];
-	if(!req.body.id){
+router.post('/update_asset', function (req, res) {
+	let errors = [];
+	if (!req.body.id) {
 		errors.push('ID must be provided');
 	}
-	if(!req.body.address){
+	if (!req.body.address) {
 		errors.push('Address must be provided');
 	}
-	if(!req.body.size){
+	if (!req.body.size) {
 		errors.push('Size must be provided');
 	}
-	if(!req.body.value){
+	if (!req.body.value) {
 		errors.push('Value must be provided');
 	}
-	if(errors.length > 0)
-	{
-		res.render('update_form',{
-			errors:errors,
-			success:{}
+	if (errors.length > 0) {
+		res.render('update_form', {
+			errors: errors,
+			success: {}
 		});
 	}
-	else
-	{
+	else {
 		'use strict';
 
 		const { Gateway, Wallets } = require('fabric-network');
@@ -400,10 +383,10 @@ router.post('/update_asset', function(req,res){
 
 		async function main() {
 			try {
-				if(org1UserId === undefined){
-					res.render('login_form',{
-						errors:'Please log in to update an asset.',
-						success:{}
+				if (org1UserId === undefined) {
+					res.render('login_form', {
+						errors: 'Please log in to update an asset.',
+						success: {}
 					});
 					return;
 				}
@@ -427,19 +410,19 @@ router.post('/update_asset', function(req,res){
 
 					const attrvalue = await contract.evaluateTransaction('getattributevalue');
 
-					if(attrvalue != 'creator'){
-						res.render('update_form',{
-							errors:'You do not possess the creator role to update an asset.',
-							success:{}
+					if (attrvalue != 'creator') {
+						res.render('update_form', {
+							errors: 'You do not possess the creator role to update an asset.',
+							success: {}
 						});
 						return;
 					}
 					// Check asset owner
 					const assetOwner = await contract.evaluateTransaction('checkOwner', req.body.id);
 					if (assetOwner != org1UserId) {
-						res.render('update_form',{
-							errors:'You do not own the asset',
-							success:{}
+						res.render('update_form', {
+							errors: 'You do not own the asset',
+							success: {}
 						});
 						return;
 					}
@@ -475,9 +458,9 @@ router.post('/update_asset', function(req,res){
 						// Disconnect from the gateway when the application is closing
 						// This will close all connections to the network
 						gateway.disconnect();
-						res.render('update_form',{
-							errors:{},
-							success:'Asset record updated successfully.'
+						res.render('update_form', {
+							errors: {},
+							success: 'Asset record updated successfully.'
 						});
 					}
 				} catch (error) {
@@ -491,31 +474,30 @@ router.post('/update_asset', function(req,res){
 	}
 });
 
-router.get('/delete_form', function(req,res){
-	res.render('delete_form',{
-		errors:{},
-		success:{}
+router.get('/delete_form', function (req, res) {
+	res.render('delete_form', {
+		errors: {},
+		success: {}
 	});
 });
-router.post('/delete_asset', function(req,res){
-	let errors=[];
-	if(!req.body.id){
+router.post('/delete_asset', function (req, res) {
+	let errors = [];
+	if (!req.body.id) {
 		errors.push('Asset ID must be provided');
 	}
-	if(errors.length > 0){
-		res.render('delete_form',{
-			errors:errors,
-			success:{}
+	if (errors.length > 0) {
+		res.render('delete_form', {
+			errors: errors,
+			success: {}
 		});
 	}
-	else
-	{
+	else {
 		'use strict';
 
 		const { Gateway, Wallets } = require('fabric-network');
 		const FabricCAServices = require('fabric-ca-client');
 		const path = require('path');
-		const { buildCAClient} = require('../../test-application/javascript/CAUtil.js');
+		const { buildCAClient } = require('../../test-application/javascript/CAUtil.js');
 		const { buildCCPOrg1, buildWallet } = require('../../test-application/javascript/AppUtil.js');
 
 		const channelName = 'mychannel';
@@ -525,10 +507,10 @@ router.post('/delete_asset', function(req,res){
 
 		async function main() {
 			try {
-				if(org1UserId === undefined){
-					res.render('login_form',{
-						errors:'Please log in to delete the asset.',
-						success:{}
+				if (org1UserId === undefined) {
+					res.render('login_form', {
+						errors: 'Please log in to delete the asset.',
+						success: {}
 					});
 					return;
 				}
@@ -545,19 +527,19 @@ router.post('/delete_asset', function(req,res){
 					const network = await gateway.getNetwork(channelName);
 					const contract = network.getContract(chaincodeName);
 					const attrvalue = await contract.evaluateTransaction('getattributevalue');
-					if(attrvalue != 'creator'){
-						res.render('delete_form',{
-							errors:'You do not possess the creator role to delete an asset.',
-							success:{}
+					if (attrvalue != 'creator') {
+						res.render('delete_form', {
+							errors: 'You do not possess the creator role to delete an asset.',
+							success: {}
 						});
 						return;
 					}
 					// Check asset owner
 					const assetOwner = await contract.evaluateTransaction('checkOwner', req.body.id);
 					if (assetOwner != org1UserId) {
-						res.render('delete_form',{
-							errors:'You do not own the asset',
-							success:{}
+						res.render('delete_form', {
+							errors: 'You do not own the asset',
+							success: {}
 						});
 						return;
 					}
@@ -569,16 +551,16 @@ router.post('/delete_asset', function(req,res){
 						// Disconnect from the gateway when the application is closing
 						// This will close all connections to the network
 						gateway.disconnect();
-						res.render('delete_form',{
-							errors:{},
-							success:'Asset record deleted successfully!'
+						res.render('delete_form', {
+							errors: {},
+							success: 'Asset record deleted successfully!'
 						});
 					}
 				} catch (error) {
 					console.error(`******** FAILED to run the application: ${error}`);
-					res.render('delete_form',{
-						errors:'Error occured while deleting asset',
-						success:{}
+					res.render('delete_form', {
+						errors: 'Error occured while deleting asset',
+						success: {}
 					});
 				}
 			} catch (error) {
@@ -589,24 +571,23 @@ router.post('/delete_asset', function(req,res){
 	}
 });
 
-router.get('/search_form', function(req,res){
-	res.render('search_form',{
-		errors:{}
+router.get('/search_form', function (req, res) {
+	res.render('search_form', {
+		errors: {}
 	});
 });
 
-router.post('/search_asset', function(req,res){
-	let errors=[];
-	if(!req.body.id){
+router.post('/search_asset', function (req, res) {
+	let errors = [];
+	if (!req.body.id) {
 		errors.push('Asset ID must be provided');
 	}
-	if(errors.length > 0){
-		res.render('search_form',{
-			errors:errors
+	if (errors.length > 0) {
+		res.render('search_form', {
+			errors: errors
 		});
 	}
-	else
-	{
+	else {
 		'use strict';
 
 		const { Gateway, Wallets } = require('fabric-network');
@@ -621,10 +602,10 @@ router.post('/search_asset', function(req,res){
 
 		async function main() {
 			try {
-				if(org1UserId === undefined){
-					res.render('login_form',{
-						errors:'Please log in to search records.',
-						success:{}
+				if (org1UserId === undefined) {
+					res.render('login_form', {
+						errors: 'Please log in to search records.',
+						success: {}
 					});
 					return;
 				}
@@ -645,48 +626,38 @@ router.post('/search_asset', function(req,res){
 
 						result = await contract.evaluateTransaction('ReadAsset', req.body.id);
 
-						let data=result.toString();
-						let data2=[];
-						let label=[];
-						let values=[];
+						let data = result.toString();
+						let data2 = [];
+						let label = [];
+						let values = [];
 						// remove {} [] ""
-						for(var i=0;i<data.length;i++)
-						{
-							if(data[i]!='{' && data[i]!='}' && data[i]!='{' && data[i]!='"' && data[i]!='[' && data[i]!=']')
-							{
+						for (var i = 0; i < data.length; i++) {
+							if (data[i] != '{' && data[i] != '}' && data[i] != '{' && data[i] != '"' && data[i] != '[' && data[i] != ']') {
 								data2.push(data[i]);
 								//console.log(data[i]); // removes {} [] ""
 							}
 						}
 
-						for (var i=0; i < 8; i++)
-						{
-							if (i==0)
-							{
+						for (var i = 0; i < 8; i++) {
+							if (i == 0) {
 								label.push('Price');
 							}
-							if (i==1)
-							{
+							if (i == 1) {
 								label.push('Address');
 							}
-							if (i==2)
-							{
+							if (i == 2) {
 								label.push('LandID');
 							}
-							if (i==3)
-							{
+							if (i == 3) {
 								label.push('Owner');
 							}
-							if (i==4)
-							{
+							if (i == 4) {
 								label.push('LandSize');
 							}
-							if (i==5)
-							{
+							if (i == 5) {
 								label.push('Date');
 							}
-							if (i==6)
-							{
+							if (i == 6) {
 								label.push('Type');
 							}
 							// if (i==7)
@@ -696,31 +667,24 @@ router.post('/search_asset', function(req,res){
 						}
 
 						// Get Values (CAR0, Toyota, Prius, blue, Tomoko)
-						for(var i=0; i < data2.length; i++)
-						{
-							string='';
-							if(data2[i]==':')
-							{
-								if(data2[i+1]=='x' && data2[i+2]=='5' && data2[i+3]=='0' && data2[i+4]=='9' && data2[i+5]==':' && data2[i+6]==':' && data2[i+7]=='C' && data2[i+8]=='N' && data2[i+9]=='=')
-								{
+						for (var i = 0; i < data2.length; i++) {
+							string = '';
+							if (data2[i] == ':') {
+								if (data2[i + 1] == 'x' && data2[i + 2] == '5' && data2[i + 3] == '0' && data2[i + 4] == '9' && data2[i + 5] == ':' && data2[i + 6] == ':' && data2[i + 7] == 'C' && data2[i + 8] == 'N' && data2[i + 9] == '=') {
 									i += 9;
 								}
 								// Remove text ':CN=ca.org1.example.com'
-								if(data2[i+1]==':' && data2[i+2]=='C' && data2[i+3]=='N' && data2[i+4]=='=' && data2[i+5]=='c' && data2[i+6]=='a' && data2[i+7]=='.' && data2[i+8]=='o' && data2[i+9]=='r' && data2[i+10]=='g' && data2[i+11]=='1' && data2[i+12]=='.' && data2[i+13]=='e' && data2[i+14]=='x' && data2[i+15]=='a' && data2[i+16]=='m' && data2[i+17]=='p' && data2[i+18]=='l' && data2[i+19]=='e' && data2[i+20]=='.' && data2[i+21]=='c' && data2[i+22]=='o' && data2[i+23]=='m')
-								{
+								if (data2[i + 1] == ':' && data2[i + 2] == 'C' && data2[i + 3] == 'N' && data2[i + 4] == '=' && data2[i + 5] == 'c' && data2[i + 6] == 'a' && data2[i + 7] == '.' && data2[i + 8] == 'o' && data2[i + 9] == 'r' && data2[i + 10] == 'g' && data2[i + 11] == '1' && data2[i + 12] == '.' && data2[i + 13] == 'e' && data2[i + 14] == 'x' && data2[i + 15] == 'a' && data2[i + 16] == 'm' && data2[i + 17] == 'p' && data2[i + 18] == 'l' && data2[i + 19] == 'e' && data2[i + 20] == '.' && data2[i + 21] == 'c' && data2[i + 22] == 'o' && data2[i + 23] == 'm') {
 									i += 24;
 								}
 								// Remove O=org1.example.com
-								if(data2[i+1]=='O' && data2[i+2]=='=' && data2[i+3]=='o' && data2[i+4]=='r' && data2[i+5]=='g' && data2[i+6]=='1' && data2[i+7]=='.' && data2[i+8]=='e' && data2[i+9]=='x' && data2[i+10]=='a' && data2[i+11]=='m' && data2[i+12]=='p' && data2[i+13]=='l' && data2[i+14]=='e' && data2[i+15]=='.' && data2[i+16]=='c' && data2[i+17]=='o' && data2[i+18]=='m')
-								{
+								if (data2[i + 1] == 'O' && data2[i + 2] == '=' && data2[i + 3] == 'o' && data2[i + 4] == 'r' && data2[i + 5] == 'g' && data2[i + 6] == '1' && data2[i + 7] == '.' && data2[i + 8] == 'e' && data2[i + 9] == 'x' && data2[i + 10] == 'a' && data2[i + 11] == 'm' && data2[i + 12] == 'p' && data2[i + 13] == 'l' && data2[i + 14] == 'e' && data2[i + 15] == '.' && data2[i + 16] == 'c' && data2[i + 17] == 'o' && data2[i + 18] == 'm') {
 									i += 18;
 								}
 
 								j = i + 1;
-								while(data2[j] != ',')
-								{
-									if(j==data2.length-1)
-									{
+								while (data2[j] != ',') {
+									if (j == data2.length - 1) {
 										string += data2[j];
 										break;
 									}
@@ -737,9 +701,9 @@ router.post('/search_asset', function(req,res){
 						// console.log(label);
 						// console.log(values);
 
-						res.render('search_result',{
+						res.render('search_result', {
 							label: label,
-							values:values
+							values: values
 						});
 					} finally {
 						// Disconnect from the gateway when the application is closing
@@ -748,8 +712,8 @@ router.post('/search_asset', function(req,res){
 					}
 				} catch (error) {
 					console.error(`******** FAILED to run the application: ${error}`);
-					res.render('search_form',{
-						errors:'Asset ' + req.body.id + ' does not exist'
+					res.render('search_form', {
+						errors: 'Asset ' + req.body.id + ' does not exist'
 					});
 				}
 			} catch (error) {
@@ -760,28 +724,27 @@ router.post('/search_asset', function(req,res){
 	}
 });
 
-router.get('/update_owner_form', function(req,res){
-	res.render('update_owner_form',{
-		errors:{},
-		success:{}
+router.get('/update_owner_form', function (req, res) {
+	res.render('update_owner_form', {
+		errors: {},
+		success: {}
 	});
 });
-router.post('/update_owner', function(req,res){
-	let errors=[];
-	if(!req.body.id){
+router.post('/update_owner', function (req, res) {
+	let errors = [];
+	if (!req.body.id) {
 		errors.push('Asset ID must be provided');
 	}
-	if(!req.body.newowner){
+	if (!req.body.newowner) {
 		errors.push('New owner name must be provided');
 	}
-	if(errors.length > 0){
-		res.render('update_owner_form',{
-			errors:errors,
-			success:{}
+	if (errors.length > 0) {
+		res.render('update_owner_form', {
+			errors: errors,
+			success: {}
 		});
 	}
-	else
-	{
+	else {
 		'use strict';
 
 		const { Gateway, Wallets } = require('fabric-network');
@@ -798,10 +761,10 @@ router.post('/update_owner', function(req,res){
 
 		async function main() {
 			try {
-				if(org1UserId === undefined){
-					res.render('login_form',{
-						errors:'Please log in to update owner.',
-						success:{}
+				if (org1UserId === undefined) {
+					res.render('login_form', {
+						errors: 'Please log in to update owner.',
+						success: {}
 					});
 					return;
 				}
@@ -815,9 +778,9 @@ router.post('/update_owner', function(req,res){
 					const userIdentity = await wallet.get(req.body.newowner);
 					if (!userIdentity) {
 						console.log(`An identity for the user ${req.body.newowner} does not exist in the wallet`);
-						res.render('update_owner_form',{
-							errors:'An identity for the user ' + req.body.newowner + ' does not exist in the wallet',
-							success:{}
+						res.render('update_owner_form', {
+							errors: 'An identity for the user ' + req.body.newowner + ' does not exist in the wallet',
+							success: {}
 						});
 						return;
 					}
@@ -834,9 +797,9 @@ router.post('/update_owner', function(req,res){
 					// Check asset owner
 					const assetOwner = await contract.evaluateTransaction('checkOwner', req.body.id);
 					if (assetOwner != org1UserId) {
-						res.render('update_owner_form',{
-							errors:'You do not own the asset',
-							success:{}
+						res.render('update_owner_form', {
+							errors: 'You do not own the asset',
+							success: {}
 						});
 						return;
 					}
@@ -848,16 +811,16 @@ router.post('/update_owner', function(req,res){
 						// Disconnect from the gateway when the application is closing
 						// This will close all connections to the network
 						gateway.disconnect();
-						res.render('update_owner_form',{
-							errors:{},
-							success:'New owner updated successfully!'
+						res.render('update_owner_form', {
+							errors: {},
+							success: 'New owner updated successfully!'
 						});
 					}
 				} catch (error) {
 					console.error(`******** FAILED to run the application: ${error}`);
-					res.render('update_owner_form',{
-						errors:'Error occured while transferring asset',
-						success:{}
+					res.render('update_owner_form', {
+						errors: 'Error occured while transferring asset',
+						success: {}
 					});
 				}
 			} catch (error) {
@@ -868,28 +831,27 @@ router.post('/update_owner', function(req,res){
 	}
 });
 
-router.get('/register_user_form', function(req,res){
-	res.render('register_user_form',{
-		errors:{},
-		success:{}
+router.get('/register_user_form', function (req, res) {
+	res.render('register_user_form', {
+		errors: {},
+		success: {}
 	});
 });
-router.post('/register_user', function(req,res){
-	let errors=[];
-	if(!req.body.userId){
+router.post('/register_user', function (req, res) {
+	let errors = [];
+	if (!req.body.userId) {
 		errors.push('User id must be provided');
 	}
-	if(!req.body.role){
+	if (!req.body.role) {
 		errors.push('A role must be selected for the new user');
 	}
-	if(errors.length > 0){
-		res.render('register_user_form',{
-			errors:errors,
-			success:{}
+	if (errors.length > 0) {
+		res.render('register_user_form', {
+			errors: errors,
+			success: {}
 		});
 	}
-	else
-	{
+	else {
 		'use strict';
 
 		const { Gateway, Wallets } = require('fabric-network');
@@ -904,20 +866,22 @@ router.post('/register_user', function(req,res){
 		const walletPath = path.join(__dirname, 'wallet');
 		const org1UserId = req.body.userId;
 		const mysql = require('mysql');
-		const connection = mysql.createConnection({
-			host: 'localhost',
-			user: 'root@localhost',
-			password: '',
-			database: 'user',
-		  });
+		//Create Connections
 
-		  connection.connect((err) => {
+		const db = mysql.createConnection({
+			host: 'localhost',
+			user: 'root',
+			password: '',
+			database: '',
+		});
+
+		//connect to database
+		db.connect((err) => {
 			if (err) {
-			  console.error('Error connecting to MySQL server: ' + err.stack);
-			  return;
+				throw err;
 			}
-			console.log('Connected to MySQL server.');
-		  });
+			console.log('Connection done');
+		});
 
 
 
@@ -934,7 +898,7 @@ router.post('/register_user', function(req,res){
 				if (userIdentity) {
 					console.log(`An identity for the user ${org1UserId} already exists in the wallet`);
 				}
-				await registerAndEnrollUser(caClient, wallet, mspOrg1, org1UserId, 'org1.department1', req.body.role, req.body.username, req.body.cnic, req.body.email, req.body.mobile ,req.body.password);
+				await registerAndEnrollUser(caClient, wallet, mspOrg1, org1UserId, 'org1.department1', req.body.role, req.body.username, req.body.cnic, req.body.email, req.body.mobile, req.body.password);
 				console.log(req.body.role, req.body.username, req.body.password);
 
 			} catch (error) {
@@ -953,31 +917,30 @@ router.post('/register_user', function(req,res){
 
 		}
 		main();
-		res.render('register_user_form',{
-			errors:{},
-			success:'New user added successfully!'
+		res.render('register_user_form', {
+			errors: {},
+			success: 'New user added successfully!'
 		});
 	}
 });
 
-router.get('/asset_history_form', function(req,res){
-	res.render('asset_history_form',{
-		errors:{}
+router.get('/asset_history_form', function (req, res) {
+	res.render('asset_history_form', {
+		errors: {}
 	});
 });
 
-router.post('/history',function(req,res){
-	let errors=[];
-	if(!req.body.id){
+router.post('/history', function (req, res) {
+	let errors = [];
+	if (!req.body.id) {
 		errors.push('Asset ID must be provided');
 	}
-	if(errors.length > 0){
-		res.render('asset_history_form',{
-			errors:errors
+	if (errors.length > 0) {
+		res.render('asset_history_form', {
+			errors: errors
 		});
 	}
-	else
-	{
+	else {
 		'use strict';
 		const { Gateway, Wallets } = require('fabric-network');
 		const FabricCAServices = require('fabric-ca-client');
@@ -997,9 +960,9 @@ router.post('/history',function(req,res){
 
 		async function main() {
 			try {
-				if(org1UserId === undefined){
-					res.render('login_form',{
-						errors:'Please log in to see history of an asset.'
+				if (org1UserId === undefined) {
+					res.render('login_form', {
+						errors: 'Please log in to see history of an asset.'
 					});
 					return;
 				}
@@ -1049,16 +1012,14 @@ router.post('/history',function(req,res){
 					let result = await contract.evaluateTransaction('GetAssetHistory', req.body.id);
 					console.log(`*** Result: ${prettyJSONString(result.toString())}`);
 
-					let data=result.toString();
+					let data = result.toString();
 					console.log(data);
-					let data2=[];
-					let label=[];
-					let values=[];
+					let data2 = [];
+					let label = [];
+					let values = [];
 					// remove {} [] ""
-					for(var i=0;i<data.length;i++)
-					{
-						if(data[i]!='{' && data[i]!='}' && data[i]!='{' && data[i]!='"' && data[i]!='[' && data[i]!=']')
-						{
+					for (var i = 0; i < data.length; i++) {
+						if (data[i] != '{' && data[i] != '}' && data[i] != '{' && data[i] != '"' && data[i] != '[' && data[i] != ']') {
 							data2.push(data[i]);
 							//console.log(data[i]); // removes {} [] ""
 						}
@@ -1067,26 +1028,20 @@ router.post('/history',function(req,res){
 					// Get Labels
 					let string;
 					let j;
-					for (var i=0; i < data2.length; i++)
-					{
-						string='';
-						if (i==0 || data2[i]==',')
-						{
+					for (var i = 0; i < data2.length; i++) {
+						string = '';
+						if (i == 0 || data2[i] == ',') {
 							// Eliminite the word 'Record'
-							if(data2[i+1]=='R' && data2[i+2]=='e' && data2[i+3]=='c' && data2[i+4]=='o' && data2[i+5]=='r' && data2[i+6]=='d')
-							{
-								i+=7;
+							if (data2[i + 1] == 'R' && data2[i + 2] == 'e' && data2[i + 3] == 'c' && data2[i + 4] == 'o' && data2[i + 5] == 'r' && data2[i + 6] == 'd') {
+								i += 7;
 							}
-							if (i==0)
-							{
-								j=i;
+							if (i == 0) {
+								j = i;
 							}
-							else
-							{
-								j=i+1;
+							else {
+								j = i + 1;
 							}
-							while(data2[j] != ':')
-							{
+							while (data2[j] != ':') {
 								string += data2[j];
 								j++;
 							}
@@ -1096,16 +1051,12 @@ router.post('/history',function(req,res){
 						}
 					}
 					// Get Values
-					for(var i=0; i < data2.length; i++)
-					{
-						string='';
-						if(data2[i]==':')
-						{
+					for (var i = 0; i < data2.length; i++) {
+						string = '';
+						if (data2[i] == ':') {
 							j = i + 1;
-							while(data2[j] != ',')
-							{
-								if(j==data2.length-1)
-								{
+							while (data2[j] != ',') {
+								if (j == data2.length - 1) {
 									string += data2[j];
 									break;
 								}
@@ -1119,9 +1070,9 @@ router.post('/history',function(req,res){
 							//console.log(string);
 						}
 					}
-					res.render('history',{
+					res.render('history', {
 						label: label,
-						values:values
+						values: values
 					});
 
 				} finally {
@@ -1133,35 +1084,52 @@ router.post('/history',function(req,res){
 				console.error(`******** FAILED to run the application: ${error}`);
 			}
 		}
-    	main();
+		main();
 	}
 });
 
-router.get('/login_form', function(req,res){
-	session=req.session;
-	res.render('login_form',{
-		errors:{}
+router.get('/login_form', function (req, res) {
+	session = req.session;
+	res.render('login_form', {
+		errors: {}
 	});
+	const mysql = require('mysql');
+		//Create Connections
+
+		const db = mysql.createConnection({
+			host: 'localhost',
+			user: 'root',
+			password: '',
+			database: 'user',
+		});
+
+		//connect to database
+		db.connect((err) => {
+			if (err) {
+				throw err;
+			}
+			console.log('Connection done');
+		});
+
 });
-router.post('/login_form', function(req,res){
-	let errors=[];
-	if(!req.body.userId){
+router.post('/login_form', function (req, res) {
+	let errors = [];
+	if (!req.body.userId) {
 		errors.push('User id must be provided');
 	}
-	if(!req.body.pw){
+	if (!req.body.pw) {
 		errors.push('Password must be provided');
 	}
-	if(errors.length > 0){
-		res.render('login_form',{
-			errors:errors
+	if (errors.length > 0) {
+		res.render('login_form', {
+			errors: errors
 		});
 	}
-	else
-	{
+	else {
 		// a variable to save a session
 		let session;
-		session=req.session;
-		session.userid=req.body.userId;
+		session = req.session;
+		session.userid = req.body.userId;
 		console.log(req.session);
 
 		'use strict';
@@ -1177,6 +1145,7 @@ router.post('/login_form', function(req,res){
 		const mspOrg1 = 'Org1MSP';
 		const walletPath = path.join(__dirname, 'wallet');
 		const org1UserId = req.body.userId;
+
 
 		function prettyJSONString(inputString) {
 			return JSON.stringify(JSON.parse(inputString), null, 2);
@@ -1210,21 +1179,21 @@ router.post('/login_form', function(req,res){
 					const userIdentity = await wallet.get(org1UserId);
 					if (!userIdentity) {
 						console.log(`An identity for the user ${org1UserId} does not exist in the wallet`);
-						res.render('login_form',{
-							errors:'An identity for the user ' + org1UserId + ' does not exist in the wallet'
+						res.render('login_form', {
+							errors: 'An identity for the user ' + org1UserId + ' does not exist in the wallet'
 						});
 						return;
 					}
 					// Take hash between -----PRIVATE KEY----- and ---END PRIVATE KEY---
 					// Press ctrl+f and remove \r\n from the hash and use it as password
 					if (userIdentity && userIdentity.type === 'X.509') {
-						const pk1 = userIdentity.credentials.privateKey.substr(27,66);
-						const pk2 = userIdentity.credentials.privateKey.substr(95,64);
-						const pk3 = userIdentity.credentials.privateKey.substr(161,56);
+						const pk1 = userIdentity.credentials.privateKey.substr(27, 66);
+						const pk2 = userIdentity.credentials.privateKey.substr(95, 64);
+						const pk3 = userIdentity.credentials.privateKey.substr(161, 56);
 						const privateKey = pk1.trim() + pk2.trim() + pk3.trim();
 						if (req.body.pw != privateKey) {
-							res.render('login_form',{
-								errors:'You have provided an invalid password'
+							res.render('login_form', {
+								errors: 'You have provided an invalid password'
 							});
 							return;
 						}
@@ -1250,7 +1219,7 @@ router.post('/login_form', function(req,res){
 					// is deployed the first time. Any updates to the chaincode deployed later would likely not need to run
 					// an "init" type function.
 					// Comment out this line after first execution and restart server.
-					let assetsExist = await contract.evaluateTransaction('AssetExists','asset1');
+					let assetsExist = await contract.evaluateTransaction('AssetExists', 'asset1');
 					// add initial assets only when they do not exist
 					if (assetsExist == 'false') {
 						await contract.submitTransaction('InitLedger');
@@ -1262,41 +1231,33 @@ router.post('/login_form', function(req,res){
 					let result = await contract.evaluateTransaction('GetAllAssets');
 					console.log(`*** Result: ${prettyJSONString(result.toString())}`);
 
-					let data=result.toString();
-					let data2=[];
-					let label=[];
-					let values=[];
+					let data = result.toString();
+					let data2 = [];
+					let label = [];
+					let values = [];
 					// remove {} [] ""
-					for(var i=0;i<data.length;i++)
-					{
-						if(data[i]!='{' && data[i]!='}' && data[i]!='{' && data[i]!='"' && data[i]!='[' && data[i]!=']')
-						{
+					for (var i = 0; i < data.length; i++) {
+						if (data[i] != '{' && data[i] != '}' && data[i] != '{' && data[i] != '"' && data[i] != '[' && data[i] != ']') {
 							data2.push(data[i]);
 						}
 					}
 					// Get Labels (Key, make, model, colour, owner)
 					let string;
 					let j;
-					for (var i=0; i < data2.length; i++)
-					{
-						string='';
-						if (i==0 || data2[i]==',')
-						{
+					for (var i = 0; i < data2.length; i++) {
+						string = '';
+						if (i == 0 || data2[i] == ',') {
 							// Eliminite the word 'Record'
-							if(data2[i+1]=='R' && data2[i+2]=='e' && data2[i+3]=='c' && data2[i+4]=='o' && data2[i+5]=='r' && data2[i+6]=='d')
-							{
-								i+=7;
+							if (data2[i + 1] == 'R' && data2[i + 2] == 'e' && data2[i + 3] == 'c' && data2[i + 4] == 'o' && data2[i + 5] == 'r' && data2[i + 6] == 'd') {
+								i += 7;
 							}
-							if (i==0)
-							{
-								j=i;
+							if (i == 0) {
+								j = i;
 							}
-							else
-							{
-								j=i+1;
+							else {
+								j = i + 1;
 							}
-							while(data2[j] != ':')
-							{
+							while (data2[j] != ':') {
 								string += data2[j];
 								j++;
 							}
@@ -1305,16 +1266,12 @@ router.post('/login_form', function(req,res){
 						}
 					}
 					// Get Values (CAR0, Toyota, Prius, blue, Tomoko)
-					for(var i=0; i < data2.length; i++)
-					{
-						string='';
-						if(data2[i]==':')
-						{
+					for (var i = 0; i < data2.length; i++) {
+						string = '';
+						if (data2[i] == ':') {
 							j = i + 1;
-							while(data2[j] != ',')
-							{
-								if(j==data2.length-1)
-								{
+							while (data2[j] != ',') {
+								if (j == data2.length - 1) {
 									string += data2[j];
 									break;
 								}
@@ -1328,9 +1285,9 @@ router.post('/login_form', function(req,res){
 						}
 					}
 					// Call display.ejs from the view folder to display all assets
-					res.render('display',{
+					res.render('display', {
 						label: label,
-						values:values
+						values: values
 					});
 
 				} finally {
@@ -1346,13 +1303,13 @@ router.post('/login_form', function(req,res){
 	}
 });
 
-router.get('/logout', function(req,res){
+router.get('/logout', function (req, res) {
 	req.session.destroy();
 	// Unset userid otherwise data can be view via URL like this: http://localhost:3001/display
-	session.userid=undefined;
+	session.userid = undefined;
 	res.redirect('/');
 });
 
 // to use this router we export these routers from this file and then import that into app.js
 // using --- const routes=require('./routes');  -- see line 110 in app.js file
-module.exports=router;
+module.exports = router;
