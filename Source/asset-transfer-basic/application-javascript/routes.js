@@ -1,4 +1,7 @@
 /* eslint-disable linebreak-style */
+/* eslint-disable curly */
+/* eslint-disable quotes */
+/* eslint-disable linebreak-style */
 /* eslint-disable indent */
 /* eslint-disable linebreak-style */
 /* eslint-disable no-mixed-spaces-and-tabs */
@@ -837,6 +840,8 @@ router.get('/register_user_form', function (req, res) {
 		success: {}
 	});
 });
+
+
 router.post('/register_user', function (req, res) {
 	let errors = [];
 	if (!req.body.userId) {
@@ -865,25 +870,6 @@ router.post('/register_user', function (req, res) {
 		const mspOrg1 = 'Org1MSP';
 		const walletPath = path.join(__dirname, 'wallet');
 		const org1UserId = req.body.userId;
-		const mysql = require('mysql');
-		//Create Connections
-
-		const db = mysql.createConnection({
-			host: 'localhost',
-			user: 'root',
-			password: '',
-			database: '',
-		});
-
-		//connect to database
-		db.connect((err) => {
-			if (err) {
-				throw err;
-			}
-			console.log('Connection done');
-		});
-
-
 
 		function prettyJSONString(inputString) {
 			return JSON.stringify(JSON.parse(inputString), null, 2);
@@ -901,28 +887,138 @@ router.post('/register_user', function (req, res) {
 				await registerAndEnrollUser(caClient, wallet, mspOrg1, org1UserId, 'org1.department1', req.body.role, req.body.username, req.body.cnic, req.body.email, req.body.mobile, req.body.password);
 				console.log(req.body.role, req.body.username, req.body.password);
 
+
 			} catch (error) {
 				console.error(`******** FAILED to run the application: ${error}`);
 			}
-			// try to connect with SQL
 
-			// try {
-			// 	const fs = require("fs");
-			// 	const { parse } = require("csv-parse");
-
-
-			// } catch (error) {
-
-			// }
 
 		}
 		main();
-		res.render('register_user_form', {
-			errors: {},
-			success: 'New user added successfully!'
-		});
+
+		// do something before waiting
+		setTimeout(function () {
+			// create some context
+			const context = {
+				UserId: req.body.userId
+			};
+			res.redirect('/register_new_user_form?context=' + JSON.stringify(context));
+		}, 800);
+
+
 	}
 });
+
+router.get('/register_new_user_form', function (req, res) {
+	'use strict';
+
+	const { Gateway, Wallets } = require('fabric-network');
+	const FabricCAServices = require('fabric-ca-client');
+	const path = require('path');
+	const { buildCAClient, registerAndEnrollUser, enrollAdmin } = require('../../test-application/javascript/CAUtil.js');
+	const { buildCCPOrg1, buildWallet } = require('../../test-application/javascript/AppUtil.js');
+
+	const channelName = 'mychannel';
+	const chaincodeName = 'basic';
+	const mspOrg1 = 'Org1MSP';
+	const walletPath = path.join(__dirname, 'wallet');
+
+	const mysql = require('mysql');
+
+	// get the context from the query parameter and parse it
+	const context = JSON.parse(req.query.context);
+	const org1UserId = context.UserId;
+
+
+
+	function prettyJSONString(inputString) {
+		return JSON.stringify(JSON.parse(inputString), null, 2);
+	}
+
+	async function main() {
+		try {
+			// build an in memory object with the network configuration (also known as a connection profile)
+			const ccp = buildCCPOrg1();
+
+			// build an instance of the fabric ca services client based on
+			// the information in the network configuration
+			const caClient = buildCAClient(FabricCAServices, ccp, 'ca.org1.example.com');
+
+			// setup the wallet to hold the credentials of the application user
+			const wallet = await buildWallet(Wallets, walletPath);
+
+			// in a real application this would be done on an administrative flow, and only once
+			await enrollAdmin(caClient, wallet, mspOrg1);
+
+
+			const userIdentity = await wallet.get(org1UserId);
+
+			if (!userIdentity) {
+				console.log(`An identity for the user ${org1UserId} does not exist in the wallet`);
+			}
+			// Take hash between -----PRIVATE KEY----- and ---END PRIVATE KEY---
+			// Press ctrl+f and remove \r\n from the hash and use it as password
+			if (userIdentity && userIdentity.type === 'X.509') {
+				const pk1 = userIdentity.credentials.privateKey.substr(27, 66);
+				const pk2 = userIdentity.credentials.privateKey.substr(95, 64);
+				const pk3 = userIdentity.credentials.privateKey.substr(161, 56);
+				const privateKey = pk1.trim() + pk2.trim() + pk3.trim();
+				//Create Connections
+
+				const db = mysql.createConnection({
+					host: 'localhost',
+					user: 'root',
+					password: '',
+					database: 'test',
+				});
+				// connect to database
+				db.connect((err) => {
+					if (err) {
+						console.log(err);
+					}
+					console.log('Connection done');
+				});
+				db.connect(function (err) {
+					let post = { private_key: privateKey, username: org1UserId};
+					let checkQuery = "SELECT * FROM person WHERE private_key = ?";
+					let checkValues = [privateKey];
+					let query = db.query(checkQuery, checkValues, (err, result) => {
+						if (err) {
+							console.log(err);
+						}
+						if (result.length === 0) {
+							let insertQuery = "INSERT INTO person SET ?";
+							let insertValues = post;
+							db.query(insertQuery, insertValues, (err, result) => {
+								if (err) {
+									console.log(err);
+								}
+								console.log("Successfully private key is added in the database");
+								// res.send("Post 1 added");
+							});
+						} else {
+							console.log(" ");
+						}
+					});
+				});
+
+
+			}
+
+		} catch (error) {
+			console.error(`******** FAILED to add the entry in the database application: ${error}`);
+		}
+	}
+	main();
+
+	res.render('register_new_user_form', {
+		errors: {},
+		success: 'New user added successfully!'
+	});
+
+});
+
+
 
 router.get('/asset_history_form', function (req, res) {
 	res.render('asset_history_form', {
@@ -1093,23 +1189,8 @@ router.get('/login_form', function (req, res) {
 	res.render('login_form', {
 		errors: {}
 	});
-	const mysql = require('mysql');
-		//Create Connections
 
-		// const db = mysql.createConnection({
-		// 	host: 'localhost',
-		// 	user: 'root',
-		// 	password: '',
-		// 	database: 'user',
-		// });
 
-		//connect to database
-		// db.connect((err) => {
-		// 	if (err) {
-		// 		throw err;
-		// 	}
-		// 	console.log('Connection done');
-		// });
 
 });
 router.post('/login_form', function (req, res) {
@@ -1145,6 +1226,7 @@ router.post('/login_form', function (req, res) {
 		const mspOrg1 = 'Org1MSP';
 		const walletPath = path.join(__dirname, 'wallet');
 		const org1UserId = req.body.userId;
+
 
 
 		function prettyJSONString(inputString) {

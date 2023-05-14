@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>User Added</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!--===============================================================================================-->
+    <link rel="icon" type="image/png" href="login_stylesheet/images/icons/favicon.ico" />
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="login_stylesheet/vendor/bootstrap/css/bootstrap.min.css">
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="login_stylesheet/fonts/font-awesome-4.7.0/css/font-awesome.min.css">
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="login_stylesheet/fonts/iconic/css/material-design-iconic-font.min.css">
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="login_stylesheet/vendor/animate/animate.css">
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="login_stylesheet/vendor/css-hamburgers/hamburgers.min.css">
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="login_stylesheet/vendor/animsition/css/animsition.min.css">
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="login_stylesheet/vendor/select2/select2.min.css">
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="login_stylesheet/vendor/daterangepicker/daterangepicker.css">
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="login_stylesheet/css/util.css">
+    <link rel="stylesheet" type="text/css" href="login_stylesheet/css/main.css">
+    <!--===============================================================================================-->
+</head>
+
+<body>
+    <%if(errors.length> 0) {%>
+        <% for (var i=0; i < errors.length; i++) {%>
+            <div class="alert alert-danger">
+                <%=errors[i]%>
+            </div>
+            <%}%>
+                <%}%>
+
+                    <%if(success.length> 0) {%>
+                        <div class="alert alert-success">
+                            <%=success%>
+                        </div>
+                        <%}%>
+                            <%# To check server-side validations, remove needs-validation class temporarily%>
+                                <div class="container" style="margin-top: -3.9%;">
+                                    <h1>New User Register Successfully</h1>
+
+                                </div>
+
+
+
+
+                                <!--===============================================================================================-->
+                                <script src="login_stylesheet/vendor/jquery/jquery-3.2.1.min.js"></script>
+                                <!--===============================================================================================-->
+                                <script src="login_stylesheet/vendor/animsition/js/animsition.min.js"></script>
+                                <!--===============================================================================================-->
+                                <script src="login_stylesheet/vendor/bootstrap/js/popper.js"></script>
+                                <script src="login_stylesheet/vendor/bootstrap/js/bootstrap.min.js"></script>
+                                <!--===============================================================================================-->
+                                <script src="login_stylesheet/vendor/select2/select2.min.js"></script>
+                                <!--===============================================================================================-->
+                                <script src="login_stylesheet/vendor/daterangepicker/moment.min.js"></script>
+                                <script src="login_stylesheet/vendor/daterangepicker/daterangepicker.js"></script>
+                                <!--===============================================================================================-->
+                                <script src="login_stylesheet/vendor/countdowntime/countdowntime.js"></script>
+                                <!--===============================================================================================-->
+                                <script src="login_stylesheet/js/main.js"></script>
+
+</body>
+
+</html>
