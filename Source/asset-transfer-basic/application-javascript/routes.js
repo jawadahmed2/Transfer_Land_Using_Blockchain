@@ -895,15 +895,24 @@ router.post('/register_user', function (req, res) {
 
 		}
 		main();
+		try {
+			// do something before waiting
+			setTimeout(function () {
+				// create some context
+				const context = {
+					UserId: req.body.userId,
+					UserPassword: req.body.password,
+					UserCnic: req.body.cnic
+				};
+				res.redirect('/register_new_user_form?context=' + JSON.stringify(context));
+			}, 800);
+		} catch (error) {
+			res.render('register_user_form', {
+				errors: {},
+				success: {}
+			});
+		}
 
-		// do something before waiting
-		setTimeout(function () {
-			// create some context
-			const context = {
-				UserId: req.body.userId
-			};
-			res.redirect('/register_new_user_form?context=' + JSON.stringify(context));
-		}, 800);
 
 
 	}
@@ -928,6 +937,8 @@ router.get('/register_new_user_form', function (req, res) {
 	// get the context from the query parameter and parse it
 	const context = JSON.parse(req.query.context);
 	const org1UserId = context.UserId;
+	const userPassword = context.UserPassword;
+	const userCnic = context.UserCnic;
 
 
 
@@ -979,7 +990,7 @@ router.get('/register_new_user_form', function (req, res) {
 					console.log('Connection done');
 				});
 				db.connect(function (err) {
-					let post = { private_key: privateKey, username: org1UserId};
+					let post = { private_key: privateKey, username: org1UserId, user_cnic: userCnic, password: userPassword };
 					let checkQuery = "SELECT * FROM person WHERE private_key = ?";
 					let checkValues = [privateKey];
 					let query = db.query(checkQuery, checkValues, (err, result) => {
