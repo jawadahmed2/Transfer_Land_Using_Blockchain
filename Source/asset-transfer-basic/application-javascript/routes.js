@@ -49,7 +49,40 @@ router.get('/display', function (req, res) {
 	const chaincodeName = 'basic';
 	const mspOrg1 = 'Org1MSP';
 	const walletPath = path.join(__dirname, 'wallet');
-	const org1UserId = req.session.userid;
+	// const org1UserId = req.session.userid;
+
+	const mysql = require('mysql');
+	const UserCnic = req.session.userid;
+
+		const db = mysql.createConnection({
+			host: 'localhost',
+			user: 'root',
+			password: '',
+			database: 'test',
+		});
+		// connect to database
+		db.connect((err) => {
+			if (err) {
+				console.log(err);
+			}
+			console.log('Connection done');
+		});
+		db.connect(function (err) {
+			let sql = `SELECT * FROM person WHERE user_cnic= ${UserCnic}`;
+			let query = db.query(sql, async (err, result) => {
+				if (err) {
+					console.log("Data Not Found");
+				}
+				// console.log(result);
+				const fetchedResult = result;
+
+				const org1UserId = fetchedResult[0].username;
+
+				// Call a function or perform actions that rely on the fetched data
+				// eslint-disable-next-line no-use-before-define
+				await main(org1UserId);
+			});
+		});
 
 	console.log(req.session);
 
@@ -57,7 +90,7 @@ router.get('/display', function (req, res) {
 		return JSON.stringify(JSON.parse(inputString), null, 2);
 	}
 
-	async function main() {
+	async function main(org1UserId) {
 		try {
 			if (org1UserId === undefined) {
 				res.render('login_form', {
@@ -198,7 +231,7 @@ router.get('/display', function (req, res) {
 			console.error(`******** FAILED to run the application: ${error}`);
 		}
 	}
-	main();
+	// main();
 });
 
 
@@ -247,9 +280,41 @@ router.post('/create_asset', function (req, res) {
 		const chaincodeName = 'basic';
 		const mspOrg1 = 'Org1MSP';
 		const walletPath = path.join(__dirname, 'wallet');
-		const org1UserId = req.session.userid;
+		const mysql = require('mysql');
+		const UserCnic = req.session.userid;
 
-		async function main() {
+		const db = mysql.createConnection({
+			host: 'localhost',
+			user: 'root',
+			password: '',
+			database: 'test',
+		});
+		// connect to database
+		db.connect((err) => {
+			if (err) {
+				console.log(err);
+			}
+			console.log('Connection done');
+		});
+		db.connect(function (err) {
+			let sql = `SELECT * FROM person WHERE user_cnic= ${UserCnic}`;
+			let query = db.query(sql, async (err, result) => {
+				if (err) {
+					console.log("Data Not Found");
+				}
+				// console.log(result);
+				const fetchedResult = result;
+
+				const org1UserId = fetchedResult[0].username;
+
+				// Call a function or perform actions that rely on the fetched data
+				// eslint-disable-next-line no-use-before-define
+				await main(org1UserId);
+			});
+		});
+		// const org1UserId = req.session.userid;
+
+		async function main(org1UserId) {
 			try {
 				if (org1UserId === undefined) {
 					res.render('login_form', {
@@ -308,39 +373,39 @@ router.post('/create_asset', function (req, res) {
 						// const buffer = Buffer.from(file);
 						// //console.log(buffer);
 						// const cid = await ipfsClient.add(buffer);
-						// Note: (node:75967) ExperimentalWarning: The Fetch API is an experimental feature. This feature could change at any time
-						// (Use `node --trace-warnings ...` to show where the warning was created)
-						// Remedy: Downgrade Node: nvm install 10.23.0 and nvm use 10.23.0
-						// Now let's try to submit a transaction.
-						// This will be sent to both peers and if both peers endorse the transaction, the endorsed proposal will be sent
-						// to the orderer to be committed by each of the peer's to the channel ledger.
+						// // Note: (node:75967) ExperimentalWarning: The Fetch API is an experimental feature. This feature could change at any time
+						// // (Use `node --trace-warnings ...` to show where the warning was created)
+						// // Remedy: Downgrade Node: nvm install 10.23.0 and nvm use 10.23.0
+						// // Now let's try to submit a transaction.
+						// // This will be sent to both peers and if both peers endorse the transaction, the endorsed proposal will be sent
+						// // to the orderer to be committed by each of the peer's to the channel ledger.
 						// for (const item of cid) {
-						// console.log(JSON.stringify(item));
-						// const filePath = JSON.stringify(item).substring(9,55);
-						// console.log('Value of filePath is:',filePath);
-						console.log('\n--> Submit Transaction: CreateAsset, creates new asset with ID, address, owner, size, price, date, type, and image arguments');
-						await contract.submitTransaction('CreateAsset', req.body.id, req.body.address, req.body.size, org1UserId, req.body.value); // remove filePath
-						return;
-						// }
-					} finally {
-						// Disconnect from the gateway when the application is closing
-						// This will close all connections to the network
-						gateway.disconnect();
-						res.render('insert_form', {
-							errors: {},
-							success: 'Asset record added successfully.'
-						});
+						// 	console.log(JSON.stringify(item));
+						// 	const filePath = JSON.stringify(item).substring(9, 55);
+						// 	console.log('Value of filePath is:', filePath);
+							console.log('\n--> Submit Transaction: CreateAsset, creates new asset with ID, address, owner, size, price, date, type, and image arguments');
+							await contract.submitTransaction('CreateAsset', req.body.id, req.body.address, req.body.size, org1UserId, req.body.value); // remove filePath
+						// 	return;
+						// 	}
+						} finally {
+							// Disconnect from the gateway when the application is closing
+							// This will close all connections to the network
+							gateway.disconnect();
+							res.render('insert_form', {
+								errors: {},
+								success: 'Asset record added successfully.'
+							});
+						}
+					} catch (error) {
+						console.error(`******** FAILED to run the application >>>>>: ${error}`);
 					}
 				} catch (error) {
-					console.error(`******** FAILED to run the application >>>>>: ${error}`);
+					console.error(`******** FAILED to run the application: ${error}`);
 				}
-			} catch (error) {
-				console.error(`******** FAILED to run the application: ${error}`);
 			}
+		// main();
 		}
-		main();
-	}
-});
+	});
 
 router.get('/update_form', function (req, res) {
 	res.render('update_form', {
@@ -1222,7 +1287,7 @@ router.post('/login_form', function (req, res) {
 		// a variable to save a session
 		let session;
 		session = req.session;
-		session.userid = req.body.userId;
+		session.userid = req.body.cnic;
 		console.log(req.session);
 
 		'use strict';
