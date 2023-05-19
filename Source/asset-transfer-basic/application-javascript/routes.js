@@ -54,35 +54,35 @@ router.get('/display', function (req, res) {
 	const mysql = require('mysql');
 	const UserCnic = req.session.userid;
 
-		const db = mysql.createConnection({
-			host: 'localhost',
-			user: 'root',
-			password: '',
-			database: 'test',
-		});
-		// connect to database
-		db.connect((err) => {
+	const db = mysql.createConnection({
+		host: 'localhost',
+		user: 'root',
+		password: '',
+		database: 'test',
+	});
+	// connect to database
+	db.connect((err) => {
+		if (err) {
+			console.log(err);
+		}
+		console.log('Connection done');
+	});
+	db.connect(function (err) {
+		let sql = `SELECT * FROM user WHERE user_cnic= ${UserCnic}`;
+		let query = db.query(sql, async (err, result) => {
 			if (err) {
-				console.log(err);
+				console.log("Data Not Found");
 			}
-			console.log('Connection done');
-		});
-		db.connect(function (err) {
-			let sql = `SELECT * FROM person WHERE user_cnic= ${UserCnic}`;
-			let query = db.query(sql, async (err, result) => {
-				if (err) {
-					console.log("Data Not Found");
-				}
-				// console.log(result);
-				const fetchedResult = result;
+			// console.log(result);
+			const fetchedResult = result;
 
-				const org1UserId = fetchedResult[0].username;
+			const org1UserId = fetchedResult[0].username;
 
-				// Call a function or perform actions that rely on the fetched data
-				// eslint-disable-next-line no-use-before-define
-				await main(org1UserId);
-			});
+			// Call a function or perform actions that rely on the fetched data
+			// eslint-disable-next-line no-use-before-define
+			await main(org1UserId);
 		});
+	});
 
 	console.log(req.session);
 
@@ -249,9 +249,9 @@ router.post('/create_asset', function (req, res) {
 		//console.log('Land ID is: '+req.body.id);
 		errors.push('ID must be provided');
 	}
-	if (!req.body.address) {
-		errors.push('Address must be provided');
-	}
+	// if (!req.body.address) {
+	// 	errors.push('Address must be provided');
+	// }
 	if (!req.body.size) {
 		errors.push('Land Size must be provided');
 	}
@@ -281,7 +281,17 @@ router.post('/create_asset', function (req, res) {
 		const mspOrg1 = 'Org1MSP';
 		const walletPath = path.join(__dirname, 'wallet');
 		const mysql = require('mysql');
+
 		const UserCnic = req.session.userid;
+		const District = req.body.district;
+		const Tehsil = req.body.tehsil;
+		const Mauza = req.body.mauza;
+		const Land_id = req.body.id;
+		const Land_price = req.body.value;
+		const Land_size = req.body.size;
+		const Khatuni = req.body.khatuni;
+		// const image_data = req.body.file;
+		const Address = District.concat(" ", Tehsil, ' ', ' ', Mauza, ' ', Khatuni, ' ', 'Punjab', ' ', 'Pakistan');
 
 		const db = mysql.createConnection({
 			host: 'localhost',
@@ -297,7 +307,34 @@ router.post('/create_asset', function (req, res) {
 			console.log('Connection done');
 		});
 		db.connect(function (err) {
-			let sql = `SELECT * FROM person WHERE user_cnic= ${UserCnic}`;
+			let post = {
+				user_cnic: UserCnic, district: District, tehsil: Tehsil, mauza: Mauza, khatuni: Khatuni,
+				land_id: Land_id, land_size: Land_size, land_price: Land_price
+			};
+			let checkQuery = "SELECT * FROM land_record WHERE khatuni = ?";
+			let checkValues = [Khatuni];
+			let query = db.query(checkQuery, checkValues, (err, result) => {
+				if (err) {
+					console.log(err);
+				}
+				if (result.length === 0) {
+					let insertQuery = "INSERT INTO land_record SET ?";
+					let insertValues = post;
+					db.query(insertQuery, insertValues, (err, result) => {
+						if (err) {
+							console.log(err);
+						}
+						console.log("Successfully added land record in the database");
+						// res.send("Post 1 added");
+					});
+				} else {
+					console.log(" ");
+				}
+			});
+		});
+
+		db.connect(function (err) {
+			let sql = `SELECT * FROM user WHERE user_cnic= ${UserCnic}`;
 			let query = db.query(sql, async (err, result) => {
 				if (err) {
 					console.log("Data Not Found");
@@ -383,29 +420,29 @@ router.post('/create_asset', function (req, res) {
 						// 	console.log(JSON.stringify(item));
 						// 	const filePath = JSON.stringify(item).substring(9, 55);
 						// 	console.log('Value of filePath is:', filePath);
-							console.log('\n--> Submit Transaction: CreateAsset, creates new asset with ID, address, owner, size, price, date, type, and image arguments');
-							await contract.submitTransaction('CreateAsset', req.body.id, req.body.address, req.body.size, org1UserId, req.body.value); // remove filePath
+						console.log('\n--> Submit Transaction: CreateAsset, creates new asset with ID, address, owner, size, price, date, type, and image ');
+						await contract.submitTransaction('CreateAsset', req.body.id, Address, req.body.size, org1UserId, req.body.value); // remove filePath
 						// 	return;
 						// 	}
-						} finally {
-							// Disconnect from the gateway when the application is closing
-							// This will close all connections to the network
-							gateway.disconnect();
-							res.render('insert_form', {
-								errors: {},
-								success: 'Asset record added successfully.'
-							});
-						}
-					} catch (error) {
-						console.error(`******** FAILED to run the application >>>>>: ${error}`);
+					} finally {
+						// Disconnect from the gateway when the application is closing
+						// This will close all connections to the network
+						gateway.disconnect();
+						res.render('insert_form', {
+							errors: {},
+							success: 'Asset record added successfully.'
+						});
 					}
 				} catch (error) {
-					console.error(`******** FAILED to run the application: ${error}`);
+					console.error(`******** FAILED to run the application >>>>>: ${error}`);
 				}
+			} catch (error) {
+				console.error(`******** FAILED to run the application: ${error}`);
 			}
-		// main();
 		}
-	});
+		// main();
+	}
+});
 
 router.get('/update_form', function (req, res) {
 	res.render('update_form', {
@@ -1057,14 +1094,14 @@ router.get('/register_new_user_form', function (req, res) {
 				});
 				db.connect(function (err) {
 					let post = { private_key: privateKey, username: org1UserId, user_cnic: userCnic, password: userPassword };
-					let checkQuery = "SELECT * FROM person WHERE private_key = ?";
+					let checkQuery = "SELECT * FROM user WHERE private_key = ?";
 					let checkValues = [privateKey];
 					let query = db.query(checkQuery, checkValues, (err, result) => {
 						if (err) {
 							console.log(err);
 						}
 						if (result.length === 0) {
-							let insertQuery = "INSERT INTO person SET ?";
+							let insertQuery = "INSERT INTO user SET ?";
 							let insertValues = post;
 							db.query(insertQuery, insertValues, (err, result) => {
 								if (err) {
@@ -1352,7 +1389,7 @@ router.post('/login_form', function (req, res) {
 					console.log('Connection done');
 				});
 				db.connect(function (err) {
-					let sql = `SELECT * FROM person WHERE user_cnic= ${UserCnic}`;
+					let sql = `SELECT * FROM user WHERE user_cnic= ${UserCnic}`;
 					let query = db.query(sql, async (err, result) => {
 						if (err) {
 							console.log("Data Not Found");
