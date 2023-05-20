@@ -704,9 +704,44 @@ router.post('/search_asset', function (req, res) {
 		const channelName = 'mychannel';
 		const chaincodeName = 'basic';
 		const walletPath = path.join(__dirname, 'wallet');
-		const org1UserId = req.session.userid;
+		// const org1UserId = req.session.userid;
 
-		async function main() {
+		const mysql = require('mysql');
+		const UserCnic = req.session.userid;
+		console.log(UserCnic);
+
+		const db = mysql.createConnection({
+			host: 'localhost',
+			user: 'root',
+			password: '',
+			database: 'test',
+		});
+		// connect to database
+		db.connect((err) => {
+			if (err) {
+				console.log(err);
+			}
+			console.log('Connection done');
+		});
+		db.connect(function (err) {
+			let sql = `SELECT * FROM user WHERE user_cnic= ${UserCnic}`;
+			let query = db.query(sql, async (err, result) => {
+				if (err) {
+					console.log("Data Not Found");
+				}
+				// console.log(result);
+				const fetchedResult = result;
+
+				const org1UserId = fetchedResult[0].username;
+				// Call a function or perform actions that rely on the fetched data
+				// eslint-disable-next-line no-use-before-define
+				await main(org1UserId);
+			});
+		});
+
+		console.log(req.session);
+
+		async function main(org1UserId) {
 			try {
 				if (org1UserId === undefined) {
 					res.render('login_form', {
@@ -746,19 +781,19 @@ router.post('/search_asset', function (req, res) {
 
 						for (var i = 0; i < 8; i++) {
 							if (i == 0) {
-								label.push('Price');
-							}
-							if (i == 1) {
 								label.push('Address');
 							}
-							if (i == 2) {
+							if (i == 1) {
 								label.push('LandID');
+							}
+							if (i == 2) {
+								label.push('LandSize');
 							}
 							if (i == 3) {
 								label.push('Owner');
 							}
 							if (i == 4) {
-								label.push('LandSize');
+								label.push('LandPrice');
 							}
 							if (i == 5) {
 								label.push('Date');
@@ -772,7 +807,7 @@ router.post('/search_asset', function (req, res) {
 							// }
 						}
 
-						// Get Values (CAR0, Toyota, Prius, blue, Tomoko)
+
 						for (var i = 0; i < data2.length; i++) {
 							string = '';
 							if (data2[i] == ':') {
@@ -807,7 +842,7 @@ router.post('/search_asset', function (req, res) {
 						// console.log(label);
 						// console.log(values);
 
-						res.render('search_result', {
+						res.redirect('search_result', {
 							label: label,
 							values: values
 						});
@@ -826,7 +861,7 @@ router.post('/search_asset', function (req, res) {
 				console.error(`******** FAILED to run the application: ${error}`);
 			}
 		}
-		main();
+		// main();
 	}
 });
 
