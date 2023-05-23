@@ -217,7 +217,9 @@ router.get('/display', function (req, res) {
 				}
 
 				// Call display.ejs file to show the list of assets
+				// res.render('display', { layout: false });
 				res.render('display', {
+					// layout: false,
 					label: label,
 					values: values
 				});
@@ -1438,7 +1440,136 @@ router.post('/login_form', function (req, res) {
 						if (fetchedResult[0].password == UserPassword) {
 							// Call a function or perform actions that rely on the fetched data
 							// eslint-disable-next-line no-use-before-define
-							await validation(org1UserId, private_key);
+							if (org1UserId == 'Patwari') {
+								try {
+									const userIdentity = await wallet.get(org1UserId);
+									if (!userIdentity) {
+										console.log(`An identity for the user ${org1UserId} does not exist in the wallet`);
+										res.render('login_form', {
+											errors: 'An identity for the user ' + org1UserId + ' does not exist in the wallet'
+										});
+										return;
+									}
+									// Take hash between -----PRIVATE KEY----- and ---END PRIVATE KEY---
+									// Press ctrl+f and remove \r\n from the hash and use it as password
+									if (userIdentity && userIdentity.type === 'X.509') {
+										const pk1 = userIdentity.credentials.privateKey.substr(27, 66);
+										const pk2 = userIdentity.credentials.privateKey.substr(95, 64);
+										const pk3 = userIdentity.credentials.privateKey.substr(161, 56);
+										const privateKey = pk1.trim() + pk2.trim() + pk3.trim();
+										if (private_key != privateKey) {
+											res.render('login_form', {
+												errors: 'You have provided an invalid password'
+											});
+											return;
+										}
+									}
+									// setup the gateway instance
+									// The user will now be able to create connections to the fabric network and be able to
+									// submit transactions and query. All transactions submitted by this gateway will be
+									// signed by this user using the credentials stored in the wallet.
+									await gateway.connect(ccp, {
+										wallet,
+										identity: org1UserId,
+										discovery: { enabled: true, asLocalhost: true } // using asLocalhost as this gateway is using a fabric network deployed locally
+									});
+
+									// Build a network instance based on the channel where the smart contract is deployed
+									const network = await gateway.getNetwork(channelName);
+
+									// Get the contract from the network.
+									const contract = network.getContract(chaincodeName);
+
+									// Initialize a set of asset data on the channel using the chaincode 'InitLedger' function.
+									// This type of transaction would only be run once by an application the first time it was started after it
+									// is deployed the first time. Any updates to the chaincode deployed later would likely not need to run
+									// an "init" type function.
+									// Comment out this line after first execution and restart server.
+									let assetsExist = await contract.evaluateTransaction('AssetExists', 'asset1');
+									// add initial assets only when they do not exist
+									if (assetsExist == 'false') {
+										await contract.submitTransaction('InitLedger');
+										console.log('*** Result: committed');
+									}
+									// Let's try a query type operation (function).
+									// This will be sent to just one peer and the results will be shown.
+									console.log('\n--> Evaluate Transaction: GetAllAssets, function returns all the current assets on the ledger');
+									let result = await contract.evaluateTransaction('GetAllAssets');
+									console.log(`*** Result: ${prettyJSONString(result.toString())}`);
+
+									let data = result.toString();
+									let data2 = [];
+									let label = [];
+									let values = [];
+									// remove {} [] ""
+									for (var i = 0; i < data.length; i++) {
+										if (data[i] != '{' && data[i] != '}' && data[i] != '{' && data[i] != '"' && data[i] != '[' && data[i] != ']') {
+											data2.push(data[i]);
+										}
+									}
+									// Get Labels (Key, make, model, colour, owner)
+									let string;
+									let j;
+									for (var i = 0; i < data2.length; i++) {
+										string = '';
+										if (i == 0 || data2[i] == ',') {
+											// Eliminite the word 'Record'
+											if (data2[i + 1] == 'R' && data2[i + 2] == 'e' && data2[i + 3] == 'c' && data2[i + 4] == 'o' && data2[i + 5] == 'r' && data2[i + 6] == 'd') {
+												i += 7;
+											}
+											if (i == 0) {
+												j = i;
+											}
+											else {
+												j = i + 1;
+											}
+											while (data2[j] != ':') {
+												string += data2[j];
+												j++;
+											}
+											label.push(string);
+											i = --j;
+										}
+									}
+									// Get Values (CAR0, Toyota, Prius, blue, Tomoko)
+									for (var i = 0; i < data2.length; i++) {
+										string = '';
+										if (data2[i] == ':') {
+											j = i + 1;
+											while (data2[j] != ',') {
+												if (j == data2.length - 1) {
+													string += data2[j];
+													break;
+												}
+												string += data2[j];
+												j++;
+											}
+											if (string != '') {
+												values.push(string);
+											}
+											i = --j;
+										}
+									}
+									// Call display.ejs from the view folder to display all assets
+									// res.render('display', { layout: false });
+
+									res.render('patwari', {
+										// layout: false,
+										label: label,
+										values: values
+									});
+
+								} finally {
+									// Disconnect from the gateway when the application is closing
+									// This will close all connections to the network
+									gateway.disconnect();
+								}
+
+
+							} else {
+								// eslint-disable-next-line no-use-before-define
+								await validation(org1UserId, private_key);
+							}
 
 						} else {
 							// eslint-disable-next-line no-use-before-define
@@ -1566,7 +1697,10 @@ router.post('/login_form', function (req, res) {
 							}
 						}
 						// Call display.ejs from the view folder to display all assets
+						// res.render('display', { layout: false });
+
 						res.render('display', {
+							// layout: false,
 							label: label,
 							values: values
 						});
@@ -1582,6 +1716,104 @@ router.post('/login_form', function (req, res) {
 			}
 		}
 		main();
+	}
+});
+
+
+
+
+
+router.get('/patwari', function (req, res) {
+	res.render('patwari', {
+		errors: {}
+	});
+});
+
+router.post('/land_request', function (req, res) {
+	let errors = [];
+	if (!req.body.id) {
+		errors.push('Asset ID must be provided');
+	}
+	if (errors.length > 0) {
+		res.render('display', {
+			errors: errors
+		});
+	}
+	else {
+		'use strict';
+
+		const mysql = require('mysql');
+		const LandId = req.body.id;
+
+
+		console.log(LandId);
+		const UserCnic = req.session.userid;
+
+
+
+
+		const db = mysql.createConnection({
+			host: 'localhost',
+			user: 'root',
+			password: '',
+			database: 'test',
+		});
+		// connect to database
+		db.connect((err) => {
+			if (err) {
+				console.log(err);
+			}
+			console.log('Connection done');
+		});
+
+		db.connect(function (err) {
+			let sql = `SELECT * FROM land_record WHERE land_id = '${LandId}'`;
+			let query = db.query(sql, async (err, result) => {
+				if (err) {
+					console.log("Data Not Found");
+				}
+				const fetchedResult = result;
+				// eslint-disable-next-line no-use-before-define
+				await main(fetchedResult);
+			});
+		});
+
+
+		async function main(fetchedResult) {
+			try {
+
+				console.log(fetchedResult);
+
+				db.connect(function (err) {
+					let post = { land_id: LandId, seller_cnic: fetchedResult[0].user_cnic, buyer_cnic:UserCnic, status: 0 };
+					let checkQuery = "SELECT * FROM buyer_requests WHERE land_id = ?";
+					let checkValues = [LandId];
+					let query = db.query(checkQuery, checkValues, (err, result) => {
+						if (err) {
+							console.log(err);
+						}
+						if (result.length === 0) {
+							let insertQuery = "INSERT INTO buyer_requests SET ?";
+							let insertValues = post;
+							db.query(insertQuery, insertValues, (err, result) => {
+								if (err) {
+									console.log(err);
+								}
+								console.log("Successfully buyer request is added in the database");
+								// res.send("Post 1 added");
+							});
+						} else {
+							console.log(" ");
+						}
+					});
+				});
+
+
+			} catch (error) {
+				console.error(`******** FAILED to run the application: ${error}`);
+			}
+		}
+		// main();
 	}
 });
 

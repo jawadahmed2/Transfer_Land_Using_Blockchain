@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Land Record</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <style>
+        .requestBtn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .requestBtn:hover {
+            background-color: #45a049;
+        }
+    </style>
+
+</head>
+
+
+<body>
+    <h1 style="color: blue; font-weight: bold;" class="title">
+        All Land Transfer Requests
+    </h1>
+
+    <%# Tabular Display%>
+        <center>
+            <div style=" width: 100%;">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>LandID</th>
+                            <th>Owner</th>
+                            <th>Address</th>
+                            <th>LandSize</th>
+                            <th>Price</th>
+                            <th>Date</th>
+                            <th>Request</th>
+                            <!-- <th>Documents</th> -->
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        <%k=0%>
+                            <%for(var i=0; i < (result.length/7); i++){%>
+                                <tr>
+                                    <td>
+                                        <%=result[1 + k]%>
+                                    </td>
+                                    <td>
+                                        <%=result + k]%>
+                                    </td>
+                                    <td>
+                                        <%=result[0 + k]%>
+                                    </td>
+                                    <td>
+                                        <%=result[2 + k]%> Sqft
+                                    </td>
+                                    <td>
+                                        <%=result[4 + k]%> RS
+                                    </td>
+                                    <td>
+                                        <%=result[5 + k]%>
+                                    </td>
+                                    <td>
+                                        <button class="requestBtn">Conform Transfer</button>
+                                        <!-- <%=values[6 + k]%> -->
+                                    </td>
+                                    <!-- <td>
+                            <%=values[7 + k]%>
+                        </td> -->
+                                </tr>
+                                <%k=k+7%>
+                                    <%}%>
+                    </tbody>
+
+                </table>
+            </div>
+        </center>
+
+        <script>
+            $(document).ready(function () {
+                // Handle button click event
+                $('.requestBtn').click(function () {
+                    var id = $(this).closest('tr').find('td:eq(0)').text().trim(); // Remove spaces from the ID value
+                    console.log(id);
+
+                    // Make AJAX request to post the ID value to the Node.js Express function
+                    $.ajax({
+                        url: '/search_asset',
+                        method: 'POST',
+                        data: { id: id },
+                        success: function (response) {
+                            console.log('ID value submitted successfully');
+                            console.log('Rendered URL:', response.url);
+                            // window.location.href = response.url; // Redirect to the rendered URL
+                        },
+                        error: function (xhr, status, error) {
+                            console.log(error);
+                        }
+                    });
+                });
+            });
+        </script>
+
+</body>
+
+</html>

@@ -43,7 +43,7 @@
                             <th>LandSize</th>
                             <th>Price</th>
                             <th>Date</th>
-                            <th>Type</th>
+                            <th>Request</th>
                             <!-- <th>Documents</th> -->
                         </tr>
                     </thead>
@@ -96,7 +96,7 @@
 
                     // Make AJAX request to post the ID value to the Node.js Express function
                     $.ajax({
-                        url: '/search_asset',
+                        url: '/land_request',
                         method: 'POST',
                         data: { id: id },
                         success: function (response) {
