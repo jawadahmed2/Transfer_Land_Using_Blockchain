@@ -47,14 +47,20 @@
 
 								<div class="wrap-input100 validate-input m-b-23" data-validate="Username is reauired">
 									<span class="label-input100">CNIC</span>
-									<input class="input100" type="text" name="cnic" placeholder="Type your CNIC Without Dashes">
+									<input class="input100" type="text" name="cnic"
+										placeholder="Type your CNIC Without Dashes">
 									<span class="focus-input100" data-symbol="&#xf206;"></span>
+									<p style="color: red;" class="validation-message"
+                                                            id="cnic-error"></p>
+
 								</div>
 
 								<div class="wrap-input100 validate-input" data-validate="Password is required">
 									<span class="label-input100">Password</span>
 									<input class="input100" type="password" name="pw" placeholder="Type your password">
 									<span class="focus-input100" data-symbol="&#xf190;"></span>
+									<p style="color: red;" class="validation-message"
+                                                            id="password-error"></p>
 								</div>
 
 								<div class="text-right p-t-8 p-b-31">
@@ -106,6 +112,27 @@
 			<script src="login_stylesheet/vendor/countdowntime/countdowntime.js"></script>
 			<!--===============================================================================================-->
 			<script src="login_stylesheet/js/main.js"></script>
+			<script>
+				document.querySelector('.login100-form').addEventListener('submit', function (event) {
+					var cnic = document.querySelector('input[name="cnic"]').value;
+					var password = document.querySelector('input[name="pw"]').value;
+
+					// CNIC validation
+					if (cnic.length !== 13 || isNaN(cnic)) {
+						event.preventDefault(); // Prevent form submission
+						document.getElementById('cnic-error').textContent = 'Please enter a valid 13-digit CNIC number.';
+
+					}
+
+					// Password validation
+					if (password.length < 8) {
+						event.preventDefault(); // Prevent form submission
+						document.getElementById('password-error').textContent = 'Please enter a valid password with at least 8 characters, including at least 1 letter and 1 digit.';
+
+					}
+				});
+			</script>
+
 
 </body>
 

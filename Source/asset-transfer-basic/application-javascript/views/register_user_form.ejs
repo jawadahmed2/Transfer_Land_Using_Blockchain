@@ -48,7 +48,8 @@
                                     <div class="limiter">
                                         <div class="container-login100">
                                             <div class="wrap-login100 p-l-55 p-r-55 p-t-20 p-b-35">
-                                                <form action="/register_user" method="POST" class="login100-form validate-form">
+                                                <form action="/register_user" method="POST" id='registration'
+                                                    class="login100-form validate-form">
                                                     <span class="login100-form-title p-b-5">
                                                         SignUp
                                                     </span>
@@ -64,9 +65,11 @@
                                                     <div class="wrap-input100 validate-input m-b-5"
                                                         data-validate="Username is reauired">
                                                         <span class="label-input100 m-b-5">CNIC</span>
-                                                        <input class="input100" type="text" name="cnic"
+                                                        <input class="input100" type="text" id="cnic" name="cnic"
                                                             placeholder="12345XXXXXXXX">
                                                         <span class="focus-input100" data-symbol="&#xf206;"></span>
+                                                        <p style="color: red;" class="validation-message"
+                                                            id="cnic-error"></p>
                                                     </div>
                                                     <div class="invalid-feedback">
                                                         Please enter user cnic
@@ -87,17 +90,22 @@
                                                     <div class="wrap-input100 validate-input m-b-5"
                                                         data-validate="Username is reauired">
                                                         <span class="label-input100 m-b-5">Mobile Number</span>
-                                                        <input class="input100" type="number" name="mobile"
+                                                        <input class="input100" type="text" id="mobile" name="mobile"
                                                             placeholder="03XXXXXXXXX">
                                                         <span class="focus-input100" data-symbol="&#xf206;"></span>
+                                                        <p style="color: red;" class="validation-message"
+                                                            id="mobile-error"></p>
                                                     </div>
 
                                                     <div class="wrap-input100 validate-input "
                                                         data-validate="Password is required">
                                                         <span class="label-input100 m-b-5">Password</span>
-                                                        <input class="input100" type="password" name="password" id="password"
+                                                        <input class="input100" type="password" id="password"
+                                                            name="password" id="password"
                                                             placeholder="Type your password">
                                                         <span class="focus-input100" data-symbol="&#xf190;"></span>
+                                                        <p style="color: red;" class="validation-message"
+                                                            id="password-error"></p>
                                                     </div>
 
                                                     <div class="container-login100-form-btn p-t-15 p-b-5">
@@ -144,6 +152,34 @@
                                 <script src="login_stylesheet/vendor/countdowntime/countdowntime.js"></script>
                                 <!--===============================================================================================-->
                                 <script src="login_stylesheet/js/main.js"></script>
+                                <script>
+                                    document.getElementById('registration').addEventListener('submit', function (event) {
+                                        var cnic = document.getElementById('cnic').value;
+                                        var mobile = document.getElementById('mobile').value;
+                                        var password = document.getElementById('password').value;
+
+                                        // CNIC validation
+                                        if (cnic.length !== 13 || isNaN(cnic)) {
+                                            event.preventDefault(); // Prevent form submission
+                                            document.getElementById('cnic-error').textContent = 'Please enter a valid 13-digit CNIC number.';
+                                        }
+
+                                        // Mobile number validation
+                                        if (mobile.length !== 11 || !mobile.startsWith('03') || isNaN(mobile)) {
+                                            event.preventDefault(); // Prevent form submission
+                                            document.getElementById('mobile-error').textContent = 'Please enter a valid mobile number starting with 03.';
+                                        }
+
+                                        // Password validation
+                                        var passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d).{8,}$/;
+                                        if (!password.match(passwordRegex)) {
+                                            event.preventDefault(); // Prevent form submission
+                                            document.getElementById('password-error').textContent = 'Please enter a valid password with at least 8 characters, including at least 1 letter and 1 digit.';
+                                        }
+                                    });
+
+
+                                </script>
 
 </body>
 

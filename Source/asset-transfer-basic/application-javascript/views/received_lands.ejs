@@ -61,35 +61,35 @@
                 </thead>
 
                 <tbody>
-                    <% if (values && values.length > 0) { %>
-                        <% k = 0 %>
-                        <% for (var i = 0; i < values.length / 4; i++) { %>
-                            <tr>
-                                <td>
-                                    <%= values[1 + k] %>
-                                </td>
-                                <td>
-                                    <%= values[0 + k] %>
-                                </td>
-                                <td>
-                                    <%= values[2 + k] %>
-                                </td>
-                                <td>
-                                    <button class="requestBtn">Click to Transfer</button>
-                                    <!-- <%= values[6 + k] %> -->
-                                </td>
-                                <td>
-                                    <button class="cancelBtn">Click to Decline</button>
-                                    <!-- <%= values[6 + k] %> -->
-                                </td>
-                            </tr>
-                            <% k = k + 4 %>
-                        <% } %>
-                    <% } else { %>
-                        <tr>
-                            <td colspan="4">No data available</td>
-                        </tr>
-                    <% } %>
+                    <% if (values && values.length> 0) { %>
+                        <% k=0 %>
+                            <% for (var i=0; i < values.length / 4; i++) { %>
+                                <tr>
+                                    <td>
+                                        <%= values[1 + k] %>
+                                    </td>
+                                    <td>
+                                        <%= values[0 + k] %>
+                                    </td>
+                                    <td>
+                                        <%= values[2 + k] %>
+                                    </td>
+                                    <td>
+                                        <button class="requestBtn">Click to Transfer</button>
+                                        <!-- <%= values[6 + k] %> -->
+                                    </td>
+                                    <td>
+                                        <button class="cancelBtn">Click to Decline</button>
+                                        <!-- <%= values[6 + k] %> -->
+                                    </td>
+                                </tr>
+                                <% k=k + 4 %>
+                                    <% } %>
+                                        <% } else { %>
+                                            <tr>
+                                                <td colspan="4">No data available</td>
+                                            </tr>
+                                            <% } %>
                 </tbody>
             </table>
         </div>
@@ -111,7 +111,12 @@
                     data: { id: id, newowner: username },
                     success: function (response) {
                         console.log('ID value submitted successfully');
-                        window.location.href = '/display';
+                        if (response === 'success') {
+                            window.location.href = '/display';
+                        } else {
+                            console.log('Unexpected response:', response);
+                        }
+                        // window.location.href = '/display';
 
                     },
                     error: function (xhr, status, error) {

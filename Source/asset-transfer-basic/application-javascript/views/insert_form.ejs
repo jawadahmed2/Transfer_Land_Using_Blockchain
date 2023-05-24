@@ -155,6 +155,60 @@
                         <script src="login_stylesheet/vendor/countdowntime/countdowntime.js"></script>
                         <!--===============================================================================================-->
                         <script src="login_stylesheet/js/main.js"></script>
+                        <script>
+                            document.querySelector('.login100-form').addEventListener('submit', function(event) {
+                                var landId = document.querySelector('input[name="id"]').value;
+                                var district = document.querySelector('input[name="district"]').value;
+                                var tehsil = document.querySelector('input[name="tehsil"]').value;
+                                var mauza = document.querySelector('input[name="mauza"]').value;
+                                var khatuni = document.querySelector('input[name="khatuni"]').value;
+                                var landSize = document.querySelector('input[name="size"]').value;
+                                var landPrice = document.querySelector('input[name="value"]').value;
+
+                                // Land ID validation
+                                if (landId.trim() === '') {
+                                    event.preventDefault(); // Prevent form submission
+                                    alert('Please enter a valid Land ID.');
+                                }
+
+                                // District validation
+                                if (district.trim() === '') {
+                                    event.preventDefault(); // Prevent form submission
+                                    alert('Please enter a valid District.');
+                                }
+
+                                // Tehsil validation
+                                if (tehsil.trim() === '') {
+                                    event.preventDefault(); // Prevent form submission
+                                    alert('Please enter a valid Tehsil.');
+                                }
+
+                                // Mauza validation
+                                if (mauza.trim() === '') {
+                                    event.preventDefault(); // Prevent form submission
+                                    alert('Please enter a valid Mauza.');
+                                }
+
+                                // Khatuni validation
+                                if (khatuni.trim() === '') {
+                                    event.preventDefault(); // Prevent form submission
+                                    alert('Please enter a valid Khatuni.');
+                                }
+
+                                // Land Size validation
+                                if (landSize.trim() === '') {
+                                    event.preventDefault(); // Prevent form submission
+                                    alert('Please enter a valid Land Size.');
+                                }
+
+                                // Land Price validation
+                                if (landPrice.trim() === '' || isNaN(landPrice)) {
+                                    event.preventDefault(); // Prevent form submission
+                                    alert('Please enter a valid Land Price.');
+                                }
+                            });
+                        </script>
+
 
 </body>
 

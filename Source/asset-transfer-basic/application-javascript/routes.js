@@ -782,7 +782,7 @@ router.post('/update_owner', function (req, res) {
 										console.log("Successfully updated the status in the seller_requests table");
 
 										// Send a success response
-										res.status(200).json({ success: true });
+										res.status(200).json({ response: 'success' });
 									});
 								});
 							} catch (error) {
@@ -1613,8 +1613,10 @@ router.get('/requested_lands', function (req, res) {
 		// res.render('display', { layout: false });
 		async function request(all_requests) {
 			console.log(all_requests);
+			const seller_cnic = all_requests[0].seller_cnic;
 			db.connect(function (err) {
 				let sql = `SELECT * FROM land_record WHERE land_id= '${all_requests[0].land_id}'`;
+				let sql2 = `SELECT * FROM user WHERE user_cnic = ${seller_cnic}`;
 				let query = db.query(sql, async (err, result) => {
 					if (err) {
 						console.log("Data Not Found");
@@ -1640,15 +1642,29 @@ router.get('/requested_lands', function (req, res) {
 					}
 
 					let data = [];
-					data.push(seller_cnic);
-					data.push(Land_id);
-					data.push(Address);
-					data.push(Status);
+					// data.push(seller_cnic);
+					// data.push(Land_id);
+					// data.push(Address);
+					// data.push(Status);
 
-					console.log(data);
+					// console.log(data);
 
 					// eslint-disable-next-line no-use-before-define
-					await requested_data(data);
+					// await requested_data(data);
+					db.query(sql2, async (err, result2) => {
+						if (err) {
+							console.log("Data Not Found");
+						}
+						const seller_cnic = result2[0].username;
+						data.push(seller_cnic); // Add seller name to the data array
+						data.push(Land_id);
+						data.push(Address);
+						data.push(Status);
+						console.log(data);
+
+						// eslint-disable-next-line no-use-before-define
+						await requested_data(data);
+					});
 				});
 			});
 
