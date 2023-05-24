@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Land Record</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <style>
+        .requestBtn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .requestBtn:hover {
+            background-color: #45a049;
+        }
+    </style>
+
+</head>
+
+
+<body>
+    <h1 style="color: blue; font-weight: bold;" class="title">
+        All Requested Info
+    </h1>
+
+    <center>
+        <div style=" width: 100%;">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>LandID</th>
+
+                        <th>Seller Cnic</th>
+                        <th>Address</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <% k = 0 %>
+                    <% if (values && values.length > 0) { %>
+                        <% for (var i = 0; i < (values.length / 4); i++) { %>
+                            <tr>
+                                <td>
+                                    <%= values[1 + k] %>
+                                </td>
+                                <td>
+                                    <%= values[0 + k] %>
+                                </td>
+                                <td>
+                                    <%= values[2 + k] %>
+                                </td>
+                                <td>
+                                    <%= values[3 + k] %>
+                                </td>
+                            </tr>
+                            <% k = k + 4 %>
+                        <% } %>
+                    <% } %>
+                </tbody>
+
+            </table>
+        </div>
+    </center>
+    <br><br>
+
+</body>
+
+</html>

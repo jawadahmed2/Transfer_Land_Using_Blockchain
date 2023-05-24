@@ -86,6 +86,8 @@
                 </table>
             </div>
         </center>
+        <br><br>
+
 
         <script>
             $(document).ready(function () {
@@ -93,6 +95,7 @@
                 $('.requestBtn').click(function () {
                     var id = $(this).closest('tr').find('td:eq(0)').text().trim(); // Remove spaces from the ID value
                     console.log(id);
+                    var button = $(this); // Store a reference to the button element
 
                     // Make AJAX request to post the ID value to the Node.js Express function
                     $.ajax({
@@ -101,15 +104,24 @@
                         data: { id: id },
                         success: function (response) {
                             console.log('ID value submitted successfully');
-                            console.log('Rendered URL:', response.url);
-                            // window.location.href = response.url; // Redirect to the rendered URL
+                            window.location.href = '/requested_lands';
+                            
+                            // Check the response from the server
+                            if (response.success) {
+                                $('.requestBtn').text('Requested'); // Change button text using the stored reference
+                                $('.requestBtn').attr('disabled', true); // Disable the button to prevent further clicks
+                                 // Reload the current page
+                            } else {
+                                console.log('An error occurred: ', response.error);
+                            }
                         },
                         error: function (xhr, status, error) {
-                            console.log(error);
+                            console.log('An error occurred: ', error);
                         }
                     });
                 });
             });
+
         </script>
 
 </body>

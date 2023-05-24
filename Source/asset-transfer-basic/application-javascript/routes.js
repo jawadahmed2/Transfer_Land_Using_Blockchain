@@ -65,7 +65,7 @@ router.get('/display', function (req, res) {
 		if (err) {
 			console.log(err);
 		}
-		console.log('Connection done');
+		console.log('Connection done 3');
 	});
 	db.connect(function (err) {
 		let sql = `SELECT * FROM user WHERE user_cnic= ${UserCnic}`;
@@ -215,13 +215,12 @@ router.get('/display', function (req, res) {
 						//console.log(string);
 					}
 				}
-
 				// Call display.ejs file to show the list of assets
 				// res.render('display', { layout: false });
 				res.render('display', {
 					// layout: false,
 					label: label,
-					values: values
+					values: values,
 				});
 
 			} finally {
@@ -235,6 +234,8 @@ router.get('/display', function (req, res) {
 	}
 	// main();
 });
+
+
 
 
 router.get('/insert_form', function (req, res) {
@@ -446,239 +447,6 @@ router.post('/create_asset', function (req, res) {
 	}
 });
 
-router.get('/update_form', function (req, res) {
-	res.render('update_form', {
-		errors: {},
-		success: {}
-	});
-});
-
-// Server-side validations
-router.post('/update_asset', function (req, res) {
-	let errors = [];
-	if (!req.body.id) {
-		errors.push('ID must be provided');
-	}
-	if (!req.body.address) {
-		errors.push('Address must be provided');
-	}
-	if (!req.body.size) {
-		errors.push('Size must be provided');
-	}
-	if (!req.body.value) {
-		errors.push('Value must be provided');
-	}
-	if (errors.length > 0) {
-		res.render('update_form', {
-			errors: errors,
-			success: {}
-		});
-	}
-	else {
-		'use strict';
-
-		const { Gateway, Wallets } = require('fabric-network');
-		const FabricCAServices = require('fabric-ca-client');
-		const path = require('path');
-		const { buildCAClient, registerAndEnrollUser, enrollAdmin } = require('../../test-application/javascript/CAUtil.js');
-		const { buildCCPOrg1, buildWallet } = require('../../test-application/javascript/AppUtil.js');
-
-		const channelName = 'mychannel';
-		const chaincodeName = 'basic';
-		const mspOrg1 = 'Org1MSP';
-		const walletPath = path.join(__dirname, 'wallet');
-		const org1UserId = req.session.userid;
-
-		async function main() {
-			try {
-				if (org1UserId === undefined) {
-					res.render('login_form', {
-						errors: 'Please log in to update an asset.',
-						success: {}
-					});
-					return;
-				}
-
-				try {
-					const ccp = buildCCPOrg1();
-					const caClient = buildCAClient(FabricCAServices, ccp, 'ca.org1.example.com');
-					const wallet = await buildWallet(Wallets, walletPath);
-					await enrollAdmin(caClient, wallet, mspOrg1);
-					await registerAndEnrollUser(caClient, wallet, mspOrg1, org1UserId, 'org1.department1');
-					const gateway = new Gateway();
-
-					await gateway.connect(ccp, {
-						wallet,
-						identity: org1UserId,
-						discovery: { enabled: true, asLocalhost: true } // using asLocalhost as this gateway is using a fabric network deployed locally
-					});
-
-					const network = await gateway.getNetwork(channelName);
-					const contract = network.getContract(chaincodeName);
-
-					const attrvalue = await contract.evaluateTransaction('getattributevalue');
-
-					if (attrvalue != 'creator') {
-						res.render('update_form', {
-							errors: 'You do not possess the creator role to update an asset.',
-							success: {}
-						});
-						return;
-					}
-					// Check asset owner
-					const assetOwner = await contract.evaluateTransaction('checkOwner', req.body.id);
-					if (assetOwner != org1UserId) {
-						res.render('update_form', {
-							errors: 'You do not own the asset',
-							success: {}
-						});
-						return;
-					}
-
-					try {
-						const fs = require('fs');
-						const create = require('ipfs-http-client');
-						const projectId = '2JuAPHltL4jX6CKKvvzejOyO15K';
-						const projectSecret = '1b623e021ab46f73b445a94564557f12';
-						const projectIdAndSecret = `${projectId}:${projectSecret}`;
-						const ipfsClient = create({
-							host: 'ipfs.infura.io',
-							port: 5001,
-							protocol: 'https',
-							headers: {
-								authorization: `Basic ${Buffer.from(projectIdAndSecret).toString(
-									'base64'
-								)}`,
-							},
-						});
-						// const file = fs.readFileSync(req.body.file);
-						// const buffer = Buffer.from(file);
-						// const cid = await ipfsClient.add(buffer);
-						// for (const item of cid) {
-						// console.log(JSON.stringify(item));
-						// const filePath = JSON.stringify(item).substring(9,55);
-						// console.log('Value of filePath is:',filePath);
-						console.log('\n--> Submit Transaction: UpdateAsset, updates an existing asset');
-						await contract.submitTransaction('UpdateAsset', req.body.id, req.body.address, req.body.size, org1UserId, req.body.value); // remove filePath
-						return;
-						// }
-					} finally {
-						// Disconnect from the gateway when the application is closing
-						// This will close all connections to the network
-						gateway.disconnect();
-						res.render('update_form', {
-							errors: {},
-							success: 'Asset record updated successfully.'
-						});
-					}
-				} catch (error) {
-					console.error(`******** FAILED to run the application: ${error}`);
-				}
-			} catch (error) {
-				console.error(`******** FAILED to run the application: ${error}`);
-			}
-		}
-		main();
-	}
-});
-
-router.get('/delete_form', function (req, res) {
-	res.render('delete_form', {
-		errors: {},
-		success: {}
-	});
-});
-router.post('/delete_asset', function (req, res) {
-	let errors = [];
-	if (!req.body.id) {
-		errors.push('Asset ID must be provided');
-	}
-	if (errors.length > 0) {
-		res.render('delete_form', {
-			errors: errors,
-			success: {}
-		});
-	}
-	else {
-		'use strict';
-
-		const { Gateway, Wallets } = require('fabric-network');
-		const FabricCAServices = require('fabric-ca-client');
-		const path = require('path');
-		const { buildCAClient } = require('../../test-application/javascript/CAUtil.js');
-		const { buildCCPOrg1, buildWallet } = require('../../test-application/javascript/AppUtil.js');
-
-		const channelName = 'mychannel';
-		const chaincodeName = 'basic';
-		const walletPath = path.join(__dirname, 'wallet');
-		const org1UserId = req.session.userid;
-
-		async function main() {
-			try {
-				if (org1UserId === undefined) {
-					res.render('login_form', {
-						errors: 'Please log in to delete the asset.',
-						success: {}
-					});
-					return;
-				}
-				try {
-					const ccp = buildCCPOrg1();
-					const wallet = await buildWallet(Wallets, walletPath);
-					const gateway = new Gateway();
-					await gateway.connect(ccp, {
-						wallet,
-						identity: org1UserId,
-						discovery: { enabled: true, asLocalhost: true } // using asLocalhost as this gateway is using a fabric network deployed locally
-					});
-
-					const network = await gateway.getNetwork(channelName);
-					const contract = network.getContract(chaincodeName);
-					const attrvalue = await contract.evaluateTransaction('getattributevalue');
-					if (attrvalue != 'creator') {
-						res.render('delete_form', {
-							errors: 'You do not possess the creator role to delete an asset.',
-							success: {}
-						});
-						return;
-					}
-					// Check asset owner
-					const assetOwner = await contract.evaluateTransaction('checkOwner', req.body.id);
-					if (assetOwner != org1UserId) {
-						res.render('delete_form', {
-							errors: 'You do not own the asset',
-							success: {}
-						});
-						return;
-					}
-
-					try {
-						await contract.submitTransaction('DeleteAsset', req.body.id);
-						console.log('*** Result: committed');
-					} finally {
-						// Disconnect from the gateway when the application is closing
-						// This will close all connections to the network
-						gateway.disconnect();
-						res.render('delete_form', {
-							errors: {},
-							success: 'Asset record deleted successfully!'
-						});
-					}
-				} catch (error) {
-					console.error(`******** FAILED to run the application: ${error}`);
-					res.render('delete_form', {
-						errors: 'Error occured while deleting asset',
-						success: {}
-					});
-				}
-			} catch (error) {
-				console.error(`******** FAILED to run the application: ${error}`);
-			}
-		}
-		main();
-	}
-});
-
 router.get('/search_form', function (req, res) {
 	res.render('search_form', {
 		errors: {}
@@ -886,6 +654,7 @@ router.post('/update_owner', function (req, res) {
 			errors: errors,
 			success: {}
 		});
+		console.log(req.body.id, req.body.newowner);
 	}
 	else {
 		'use strict';
@@ -900,9 +669,41 @@ router.post('/update_owner', function (req, res) {
 		const chaincodeName = 'basic';
 		const mspOrg1 = 'Org1MSP';
 		const walletPath = path.join(__dirname, 'wallet');
-		const org1UserId = req.session.userid;
+		// const org1UserId = req.session.userid;
+		const mysql = require('mysql');
+		const UserCnic = req.session.userid;
+		const LandId = req.body.id;
 
-		async function main() {
+		const db = mysql.createConnection({
+			host: 'localhost',
+			user: 'root',
+			password: '',
+			database: 'test',
+		});
+		// connect to database
+		db.connect((err) => {
+			if (err) {
+				console.log(err);
+			}
+			console.log('Connection done 4');
+		});
+		db.connect(function (err) {
+			let sql = `SELECT * FROM user WHERE user_cnic= ${UserCnic}`;
+			let query = db.query(sql, async (err, result) => {
+				if (err) {
+					console.log("Data Not Found");
+				}
+				// console.log(result);
+				const fetchedResult = result;
+
+				const org1UserId = fetchedResult[0].username;
+
+				// Call a function or perform actions that rely on the fetched data
+				// eslint-disable-next-line no-use-before-define
+				await main(org1UserId);
+			});
+		});
+		async function main(org1UserId) {
 			try {
 				if (org1UserId === undefined) {
 					res.render('login_form', {
@@ -950,6 +751,46 @@ router.post('/update_owner', function (req, res) {
 					try {
 						await contract.submitTransaction('TransferAsset', req.body.id, req.body.newowner);
 						console.log('*** Result: committed');
+
+						db.connect(function (err) {
+							let sql = `SELECT * FROM buyer_requests WHERE land_id = '${LandId}'`;
+							let query = db.query(sql, async (err, result) => {
+								if (err) {
+									console.log("Data Not Found");
+								}
+								const fetchedResult = result;
+								// eslint-disable-next-line no-use-before-define
+								await requested_data(fetchedResult);
+							});
+						});
+
+
+						async function requested_data(fetchedResult) {
+							try {
+
+								// console.log(fetchedResult);
+
+								db.connect(function (err) {
+									const LandId = fetchedResult[0].land_id; // Assuming you have the LandId value
+									let updateQuery = "UPDATE buyer_requests SET status = ? WHERE land_id = ? AND seller_cnic = ?";
+									let updateValues = [2, LandId, UserCnic]; // Update status value to 1 (or your desired value)
+
+									db.query(updateQuery, updateValues, (err, result) => {
+										if (err) {
+											console.log(err);
+										}
+										console.log("Successfully updated the status in the seller_requests table");
+
+										// Send a success response
+										res.status(200).json({ success: true });
+									});
+								});
+							} catch (error) {
+								console.error(`******** FAILED to run the application: ${error}`);
+							}
+						}
+
+
 					} finally {
 						// Disconnect from the gateway when the application is closing
 						// This will close all connections to the network
@@ -970,7 +811,7 @@ router.post('/update_owner', function (req, res) {
 				console.error(`******** FAILED to run the application: ${error}`);
 			}
 		}
-		main();
+		// main();
 	}
 });
 
@@ -1729,6 +1570,200 @@ router.get('/patwari', function (req, res) {
 	});
 });
 
+// router.get('/requested_lands', function (req, res) {
+// 	res.render('requested_lands', {
+// 		errors: {}
+// 	});
+// });
+
+router.get('/requested_lands', function (req, res) {
+	const mysql = require('mysql');
+	const UserCnic = req.session.userid;
+
+	const db = mysql.createConnection({
+		host: 'localhost',
+		user: 'root',
+		password: '',
+		database: 'test',
+	});
+	// connect to database
+	db.connect((err) => {
+		if (err) {
+			console.log(err);
+		}
+		console.log('Connection done 2');
+	});
+
+	async function main() {
+		db.connect(function (err) {
+			let sql = `SELECT * FROM buyer_requests WHERE buyer_cnic= ${UserCnic}`;
+			let query = db.query(sql, async (err, result) => {
+				if (err) {
+					console.log("Data Not Found");
+				}
+				// console.log(result);
+				const all_requests = result;
+				// console.log(all_requests);
+				// eslint-disable-next-line no-use-before-define
+				await request(all_requests);
+
+			});
+		});
+		// Call display.ejs file to show the list of assets
+		// res.render('display', { layout: false });
+		async function request(all_requests) {
+			console.log(all_requests);
+			db.connect(function (err) {
+				let sql = `SELECT * FROM land_record WHERE land_id= '${all_requests[0].land_id}'`;
+				let query = db.query(sql, async (err, result) => {
+					if (err) {
+						console.log("Data Not Found");
+					}
+					console.log('Working');
+					const fetchedResult = result;
+					// console.log(fetchedResult);
+
+					const Address = fetchedResult[0].khatuni + ' ' + fetchedResult[0].mauza + ' ' + fetchedResult[0].tehsil + ' ' +
+						fetchedResult[0].district + ' ' + 'Punjab' + ' ' + 'Pakistan';
+					const Land_id = fetchedResult[0].land_id;
+					const seller_cnic = all_requests[0].seller_cnic;
+					console.log(Address);
+					let Status;
+					if (all_requests[0].status == 0) {
+						Status = 'Pending';
+
+					} else if (all_requests[0].status == 1) {
+						Status = 'Not Approved';
+					}
+					else {
+						Status = 'Approved';
+					}
+
+					let data = [];
+					data.push(seller_cnic);
+					data.push(Land_id);
+					data.push(Address);
+					data.push(Status);
+
+					console.log(data);
+
+					// eslint-disable-next-line no-use-before-define
+					await requested_data(data);
+				});
+			});
+
+			async function requested_data(data) {
+				res.render('requested_lands', {
+					// layout: false,
+					// data: all_requests
+					values: data,
+				});
+			}
+		}
+	}
+	main();
+});
+
+
+router.get('/received_lands', function (req, res) {
+	const mysql = require('mysql');
+	const UserCnic = req.session.userid;
+
+	const db = mysql.createConnection({
+		host: 'localhost',
+		user: 'root',
+		password: '',
+		database: 'test',
+	});
+	// connect to database
+	db.connect((err) => {
+		if (err) {
+			console.log(err);
+		}
+		console.log('Connection done 2');
+	});
+
+	async function main() {
+		db.connect(function (err) {
+			let sql = `SELECT * FROM buyer_requests WHERE seller_cnic= ${UserCnic}`;
+			let query = db.query(sql, async (err, result) => {
+				if (err) {
+					console.log("Data Not Found");
+				}
+				// console.log(result);
+				const all_requests = result;
+				// console.log(all_requests);
+				// eslint-disable-next-line no-use-before-define
+				await request(all_requests);
+
+			});
+		});
+		// Call display.ejs file to show the list of assets
+		// res.render('display', { layout: false });
+		async function request(all_requests) {
+			// console.log(all_requests);
+			const buyer_cnic = all_requests[0].buyer_cnic;
+			db.connect(function (err) {
+				let sql = `SELECT * FROM land_record WHERE land_id= '${all_requests[0].land_id}'`;
+				let sql2 = `SELECT * FROM user WHERE user_cnic = ${buyer_cnic}`;
+				let query = db.query(sql, async (err, result) => {
+					if (err) {
+						console.log("Data Not Found");
+					}
+					console.log('Working');
+					const fetchedResult = result;
+					// console.log(fetchedResult);
+
+					const Address = fetchedResult[0].khatuni + ' ' + fetchedResult[0].mauza + ' ' + fetchedResult[0].tehsil + ' ' +
+						fetchedResult[0].district + ' ' + 'Punjab' + ' ' + 'Pakistan';
+					const Land_id = fetchedResult[0].land_id;
+					// const buyer_cnic = all_requests[0].buyer_cnic;
+					// console.log(Address);
+					// let Status;
+					if (all_requests[0].status == 0) {
+
+						let data = [];
+						// eslint-disable-next-line no-use-before-define
+						// await requested_data(data);
+						db.query(sql2, async (err, result2) => {
+							if (err) {
+								console.log("Data Not Found");
+							}
+							const buyer_cnic = result2[0].username;
+							data.push(buyer_cnic); // Add seller name to the data array
+							data.push(Land_id);
+							data.push(Address);
+							console.log(data);
+
+							// eslint-disable-next-line no-use-before-define
+							await requested_data(data);
+						});
+					} else {
+						res.render('received_lands', {
+							// layout: false,
+							// data: all_requests
+							values: [],
+						});
+					}
+
+				});
+			});
+
+			async function requested_data(data) {
+				res.render('received_lands', {
+					// layout: false,
+					// data: all_requests
+					values: data,
+				});
+			}
+		}
+	}
+	main();
+});
+
+
+
+
 router.post('/land_request', function (req, res) {
 	let errors = [];
 	if (!req.body.id) {
@@ -1749,9 +1784,6 @@ router.post('/land_request', function (req, res) {
 		console.log(LandId);
 		const UserCnic = req.session.userid;
 
-
-
-
 		const db = mysql.createConnection({
 			host: 'localhost',
 			user: 'root',
@@ -1763,7 +1795,7 @@ router.post('/land_request', function (req, res) {
 			if (err) {
 				console.log(err);
 			}
-			console.log('Connection done');
+			console.log('Connection done 1');
 		});
 
 		db.connect(function (err) {
@@ -1782,10 +1814,10 @@ router.post('/land_request', function (req, res) {
 		async function main(fetchedResult) {
 			try {
 
-				console.log(fetchedResult);
+				// console.log(fetchedResult);
 
 				db.connect(function (err) {
-					let post = { land_id: LandId, seller_cnic: fetchedResult[0].user_cnic, buyer_cnic:UserCnic, status: 0 };
+					let post = { land_id: LandId, seller_cnic: fetchedResult[0].user_cnic, buyer_cnic: UserCnic, status: 0 };
 					let checkQuery = "SELECT * FROM buyer_requests WHERE land_id = ?";
 					let checkValues = [LandId];
 					let query = db.query(checkQuery, checkValues, (err, result) => {
@@ -1800,15 +1832,97 @@ router.post('/land_request', function (req, res) {
 									console.log(err);
 								}
 								console.log("Successfully buyer request is added in the database");
-								// res.send("Post 1 added");
+								// Send a success response
 							});
 						} else {
 							console.log(" ");
 						}
 					});
 				});
+				res.status(200).json({ success: true });
+
+				// res.render('requested_lands', {
+				// 	errors: {}
+				// });
 
 
+
+			} catch (error) {
+				console.error(`******** FAILED to run the application: ${error}`);
+			}
+		}
+		// main();
+	}
+});
+
+
+router.post('/cancel_request', function (req, res) {
+	let errors = [];
+	if (!req.body.id) {
+		errors.push('Asset ID must be provided');
+	}
+	if (errors.length > 0) {
+		res.render('display', {
+			errors: errors
+		});
+	}
+	else {
+		'use strict';
+
+		const mysql = require('mysql');
+		const LandId = req.body.id;
+
+
+		console.log(LandId);
+		const UserCnic = req.session.userid;
+
+		const db = mysql.createConnection({
+			host: 'localhost',
+			user: 'root',
+			password: '',
+			database: 'test',
+		});
+		// connect to database
+		db.connect((err) => {
+			if (err) {
+				console.log(err);
+			}
+			console.log('Connection done 5');
+		});
+
+		db.connect(function (err) {
+			let sql = `SELECT * FROM buyer_requests WHERE land_id = '${LandId}'`;
+			let query = db.query(sql, async (err, result) => {
+				if (err) {
+					console.log("Data Not Found");
+				}
+				const fetchedResult = result;
+				// eslint-disable-next-line no-use-before-define
+				await main(fetchedResult);
+			});
+		});
+
+
+		async function main(fetchedResult) {
+			try {
+
+				// console.log(fetchedResult);
+
+				db.connect(function (err) {
+					const LandId = fetchedResult[0].land_id; // Assuming you have the LandId value
+					let updateQuery = "UPDATE buyer_requests SET status = ? WHERE land_id = ? AND buyer_cnic = ?";
+					let updateValues = [1, LandId, UserCnic]; // Update status value to 1 (or your desired value)
+
+					db.query(updateQuery, updateValues, (err, result) => {
+						if (err) {
+							console.log(err);
+						}
+						console.log("Successfully updated the status in the buyer_requests table");
+
+						// Send a success response
+						res.status(200).json({ success: true });
+					});
+				});
 			} catch (error) {
 				console.error(`******** FAILED to run the application: ${error}`);
 			}

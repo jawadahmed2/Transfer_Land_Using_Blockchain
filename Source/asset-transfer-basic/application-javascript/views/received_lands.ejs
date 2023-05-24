@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Land Record</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <style>
+        .requestBtn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .requestBtn:hover {
+            background-color: #45a049;
+        }
+
+        .cancelBtn {
+            background-color: #e44833;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .cancelBtn:hover {
+            background-color: #f31414;
+        }
+    </style>
+
+</head>
+
+
+<body>
+    <h1 style="color: blue; font-weight: bold;" class="title">
+        All Received Lands Requests
+    </h1>
+
+    <center>
+        <div style=" width: 100%;">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>LandID</th>
+                        <th>Buyer Name</th>
+                        <th>Address</th>
+                        <br>
+                        <th>Approve</th>
+                        <br>
+                        <th>Decline</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <% if (values && values.length > 0) { %>
+                        <% k = 0 %>
+                        <% for (var i = 0; i < values.length / 4; i++) { %>
+                            <tr>
+                                <td>
+                                    <%= values[1 + k] %>
+                                </td>
+                                <td>
+                                    <%= values[0 + k] %>
+                                </td>
+                                <td>
+                                    <%= values[2 + k] %>
+                                </td>
+                                <td>
+                                    <button class="requestBtn">Click to Transfer</button>
+                                    <!-- <%= values[6 + k] %> -->
+                                </td>
+                                <td>
+                                    <button class="cancelBtn">Click to Decline</button>
+                                    <!-- <%= values[6 + k] %> -->
+                                </td>
+                            </tr>
+                            <% k = k + 4 %>
+                        <% } %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="4">No data available</td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </center>
+    <br><br>
+    <script>
+        $(document).ready(function () {
+            // Handle button click event
+            $('.requestBtn').click(function () {
+                var id = $(this).closest('tr').find('td:eq(0)').text().trim(); // Remove spaces from the ID value
+                var username = $(this).closest('tr').find('td:eq(1)').text().trim(); // Remove spaces from the ID value
+                console.log(id);
+                var button = $(this); // Store a reference to the button element
+
+                // Make AJAX request to post the ID value to the Node.js Express function
+                $.ajax({
+                    url: '/update_owner',
+                    method: 'POST',
+                    data: { id: id, newowner: username },
+                    success: function (response) {
+                        console.log('ID value submitted successfully');
+                        window.location.href = '/display';
+
+                    },
+                    error: function (xhr, status, error) {
+                        console.log('An error occurred: ', error);
+                    }
+                });
+            });
+
+            $('.cancelBtn').click(function () {
+                var id = $(this).closest('tr').find('td:eq(0)').text().trim(); // Remove spaces from the ID value
+                var button = $(this); // Store a reference to the button element
+                console.log(id);
+
+                // Make AJAX request to post the ID value to the Node.js Express function
+                $.ajax({
+                    url: '/cancel_request',
+                    method: 'POST',
+                    data: { id: id },
+                    success: function (response) {
+                        console.log('ID value submitted successfully');
+                        location.reload();
+
+                    },
+                    error: function (xhr, status, error) {
+                        console.log('An error occurred: ', error);
+                    }
+                });
+            });
+        });
+
+    </script>
+
+</body>
+
+</html>
