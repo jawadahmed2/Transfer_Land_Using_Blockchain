@@ -1628,7 +1628,6 @@ router.get('/requested_lands', function (req, res) {
 					const Address = fetchedResult[0].khatuni + ' ' + fetchedResult[0].mauza + ' ' + fetchedResult[0].tehsil + ' ' +
 						fetchedResult[0].district + ' ' + 'Punjab' + ' ' + 'Pakistan';
 					const Land_id = fetchedResult[0].land_id;
-					const seller_cnic = all_requests[0].seller_cnic;
 					console.log(Address);
 					let Status;
 					if (all_requests[0].status == 0) {
