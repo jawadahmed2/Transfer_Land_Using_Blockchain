@@ -1,39 +1,53 @@
-<h1 class="title"">
-    Asset History
-</h1>
-<%# Tabular Display%>
-<div style="width: 100%">
-    <table class="table">
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>List of Owners</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 8px;
+            text-align: center;
+            /* Center align the content */
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+
+<body>
+    <center>
+        <h1>List of Owners</h1>
+    </center>
+    <table>
         <thead>
             <tr>
-                <th>Appraised Value</th>
-                <th>Color</th>
-                <th>ID</th>
                 <th>Owner</th>
-                <th>Size</th>
                 <th>Date</th>
-                <th>Type</th>
-                <th>Image</th>
             </tr>
         </thead>
         <tbody>
-            <%k=0%>
-            <%for(var i=0; i < (label.length/8+1); i++){%>
-                <%if(i>0){%>
-                    <tr>
-                        <%for(var j=0; j < 8; j++){%>
-                            <%if(j < 7){%>
-                                <td><%=values[k]%></td>
-                                <%k=k+1%>
-                            <%} else {%>
-                                <td><a href="https://basic-asset-transfer.infura-ipfs.io/ipfs/<%=values[k]%>" style="color: white" target="_blank">View</a></td>
-                                <%k=k+1%>
-                            <%}%>        
-                        <%}%>
-                    </tr>
-                <%}%>
-            <%}%>
+            <% for (var i=0; i < values.length; i++) { %>
+                <tr>
+                    <td>
+                        <%= values[i] %>
+                    </td>
+                    <td>
+                        <%= date[i] %>
+                    </td>
+                </tr>
+                <% } %>
         </tbody>
-    </table>	
-</div>
+    </table>
 
+</body>
+
+</html>

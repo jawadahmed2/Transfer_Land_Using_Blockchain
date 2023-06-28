@@ -38,7 +38,7 @@
                     <tr>
                         <th>LandID</th>
 
-                        <th>Seller Cnic</th>
+                        <th>Seller Name</th>
                         <th>Address</th>
                         <th>Status</th>
                     </tr>
@@ -64,8 +64,13 @@
                             </tr>
                             <% k = k + 4 %>
                         <% } %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="4">No result</td>
+                        </tr>
                     <% } %>
                 </tbody>
+
 
             </table>
         </div>

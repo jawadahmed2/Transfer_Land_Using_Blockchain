@@ -27,6 +27,12 @@
 
 
 <body>
+    <div style="text-align: left;">
+        <h1 style="color: blue; font-weight: bold;" class="title">
+            Welcome <%= username %>
+        </h1>
+    </div>
+
     <h1 style="color: blue; font-weight: bold;" class="title">
         All Land Info
     </h1>
@@ -105,12 +111,12 @@
                         success: function (response) {
                             console.log('ID value submitted successfully');
                             window.location.href = '/requested_lands';
-                            
+
                             // Check the response from the server
                             if (response.success) {
                                 $('.requestBtn').text('Requested'); // Change button text using the stored reference
                                 $('.requestBtn').attr('disabled', true); // Disable the button to prevent further clicks
-                                 // Reload the current page
+                                // Reload the current page
                             } else {
                                 console.log('An error occurred: ', response.error);
                             }

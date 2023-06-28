@@ -221,6 +221,7 @@ router.get('/display', function (req, res) {
 					// layout: false,
 					label: label,
 					values: values,
+					username: org1UserId
 				});
 
 			} finally {
@@ -431,9 +432,9 @@ router.post('/create_asset', function (req, res) {
 						// Disconnect from the gateway when the application is closing
 						// This will close all connections to the network
 						gateway.disconnect();
-						res.render('insert_form', {
+						res.render('display', {
+							username: org1UserId,
 							errors: {},
-							success: 'Asset record added successfully.'
 						});
 					}
 				} catch (error) {
@@ -612,7 +613,7 @@ router.post('/search_asset', function (req, res) {
 						// console.log(label);
 						// console.log(values);
 
-						res.redirect('search_result', {
+						res.render('search_result', {
 							label: label,
 							values: values
 						});
@@ -795,10 +796,10 @@ router.post('/update_owner', function (req, res) {
 						// Disconnect from the gateway when the application is closing
 						// This will close all connections to the network
 						gateway.disconnect();
-						res.render('update_owner_form', {
-							errors: {},
-							success: 'New owner updated successfully!'
-						});
+						// res.render('display', {
+						// 	errors: {},
+						// 	success: 'New owner updated successfully!'
+						// });
 					}
 				} catch (error) {
 					console.error(`******** FAILED to run the application: ${error}`);
@@ -865,7 +866,7 @@ router.post('/register_user', function (req, res) {
 				if (userIdentity) {
 					console.log(`An identity for the user ${org1UserId} already exists in the wallet`);
 				}
-				await registerAndEnrollUser(caClient, wallet, mspOrg1, org1UserId, 'org1.department1', req.body.role, req.body.username, req.body.cnic, req.body.email, req.body.mobile, req.body.password);
+				await registerAndEnrollUser(caClient, wallet, mspOrg1, org1UserId, 'org1.department1', req.body.role);
 				console.log(req.body.role, req.body.username, req.body.password);
 
 
@@ -1040,13 +1041,47 @@ router.post('/history', function (req, res) {
 		const chaincodeName = 'basic';
 		const mspOrg1 = 'Org1MSP';
 		const walletPath = path.join(__dirname, 'wallet');
-		const org1UserId = req.session.userid;
+		// const org1UserId = req.session.userid;
+		const mysql = require('mysql');
+		const UserCnic = req.session.userid;
+
+		const db = mysql.createConnection({
+			host: 'localhost',
+			user: 'root',
+			password: '',
+			database: 'test',
+		});
+		// connect to database
+		db.connect((err) => {
+			if (err) {
+				console.log(err);
+			}
+			console.log('Connection done 3');
+		});
+		db.connect(function (err) {
+			let sql = `SELECT * FROM user WHERE user_cnic= ${UserCnic}`;
+			let query = db.query(sql, async (err, result) => {
+				if (err) {
+					console.log("Data Not Found");
+				}
+				// console.log(result);
+				const fetchedResult = result;
+
+				const org1UserId = fetchedResult[0].username;
+
+				// Call a function or perform actions that rely on the fetched data
+				// eslint-disable-next-line no-use-before-define
+				await main(org1UserId);
+			});
+		});
+
+		console.log(req.session);
 
 		function prettyJSONString(inputString) {
 			return JSON.stringify(JSON.parse(inputString), null, 2);
 		}
 
-		async function main() {
+		async function main(org1UserId) {
 			try {
 				if (org1UserId === undefined) {
 					res.render('login_form', {
@@ -1158,9 +1193,14 @@ router.post('/history', function (req, res) {
 							//console.log(string);
 						}
 					}
+					rawData = JSON.parse(data);
+					const owners = rawData.map(item => item.Owner);
+					const dates = rawData.map(item => item.addedOn);
+					console.log(dates);
 					res.render('history', {
 						label: label,
-						values: values
+						values: owners,
+						date: dates
 					});
 
 				} finally {
@@ -1172,7 +1212,7 @@ router.post('/history', function (req, res) {
 				console.error(`******** FAILED to run the application: ${error}`);
 			}
 		}
-		main();
+		// main();
 	}
 });
 
@@ -1543,7 +1583,8 @@ router.post('/login_form', function (req, res) {
 						res.render('display', {
 							// layout: false,
 							label: label,
-							values: values
+							values: values,
+							username: org1UserId
 						});
 
 					} finally {
@@ -1613,72 +1654,81 @@ router.get('/requested_lands', function (req, res) {
 		// res.render('display', { layout: false });
 		async function request(all_requests) {
 			console.log(all_requests);
-			const seller_cnic = all_requests[0].seller_cnic;
-			db.connect(function (err) {
-				let sql = `SELECT * FROM land_record WHERE land_id= '${all_requests[0].land_id}'`;
-				let sql2 = `SELECT * FROM user WHERE user_cnic = ${seller_cnic}`;
-				let query = db.query(sql, async (err, result) => {
-					if (err) {
-						console.log("Data Not Found");
-					}
-					console.log('Working');
-					const fetchedResult = result;
-					// console.log(fetchedResult);
-
-					const Address = fetchedResult[0].khatuni + ' ' + fetchedResult[0].mauza + ' ' + fetchedResult[0].tehsil + ' ' +
-						fetchedResult[0].district + ' ' + 'Punjab' + ' ' + 'Pakistan';
-					const Land_id = fetchedResult[0].land_id;
-					console.log(Address);
-					let Status;
-					if (all_requests[0].status == 0) {
-						Status = 'Pending';
-
-					} else if (all_requests[0].status == 1) {
-						Status = 'Not Approved';
-					}
-					else {
-						Status = 'Approved';
-					}
-
-					let data = [];
-					// data.push(seller_cnic);
-					// data.push(Land_id);
-					// data.push(Address);
-					// data.push(Status);
-
-					// console.log(data);
-
-					// eslint-disable-next-line no-use-before-define
-					// await requested_data(data);
-					db.query(sql2, async (err, result2) => {
+			try {
+				const seller_cnic = all_requests[0].seller_cnic;
+				db.connect(function (err) {
+					let sql = `SELECT * FROM land_record WHERE land_id= '${all_requests[0].land_id}'`;
+					let sql2 = `SELECT * FROM user WHERE user_cnic = ${seller_cnic}`;
+					let query = db.query(sql, async (err, result) => {
 						if (err) {
 							console.log("Data Not Found");
 						}
-						const seller_cnic = result2[0].username;
-						data.push(seller_cnic); // Add seller name to the data array
-						data.push(Land_id);
-						data.push(Address);
-						data.push(Status);
-						console.log(data);
+						console.log('Working');
+						const fetchedResult = result;
+						// console.log(fetchedResult);
 
-						// eslint-disable-next-line no-use-before-define
-						await requested_data(data);
+						const Address = fetchedResult[0].khatuni + ' ' + fetchedResult[0].mauza + ' ' + fetchedResult[0].tehsil + ' ' +
+							fetchedResult[0].district + ' ' + 'Punjab' + ' ' + 'Pakistan';
+						const Land_id = fetchedResult[0].land_id;
+						console.log(Address);
+						let Status;
+						if (all_requests[0].status == 0) {
+							Status = 'Pending';
+
+						} else if (all_requests[0].status == 1) {
+							Status = 'Not Approved';
+						}
+						else {
+							Status = 'Approved';
+						}
+
+						let data = [];
+						db.query(sql2, async (err, result2) => {
+							if (err) {
+								console.log("Data Not Found");
+							}
+							const seller_cnic = result2[0].username;
+							data.push(seller_cnic); // Add seller name to the data array
+							data.push(Land_id);
+							data.push(Address);
+							data.push(Status);
+							console.log(data);
+							if (data && data.length > 0) {
+								// Code to execute when data is not empty
+								// eslint-disable-next-line no-use-before-define
+								await requested_data(data);
+							} else {
+								// Code to execute when data is empty
+								res.render('requested_lands', {
+									// layout: false,
+									// data: all_requests
+									values: [],
+								});
+							}
+						});
 					});
 				});
-			});
 
-			async function requested_data(data) {
+				async function requested_data(data) {
+					res.render('requested_lands', {
+						// layout: false,
+						// data: all_requests
+						values: data,
+					});
+				}
+			} catch (error) {
+				console.log(error);
 				res.render('requested_lands', {
 					// layout: false,
 					// data: all_requests
-					values: data,
+					values: [],
 				});
+
 			}
 		}
 	}
 	main();
 });
-
 
 router.get('/received_lands', function (req, res) {
 	const mysql = require('mysql');

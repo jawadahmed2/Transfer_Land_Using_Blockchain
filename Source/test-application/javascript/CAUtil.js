@@ -50,7 +50,7 @@ exports.enrollAdmin = async (caClient, wallet, orgMspId) => {
 	}
 };
 
-exports.registerAndEnrollUser = async (caClient, wallet, orgMspId, userId, affiliation, rolevalue, userName, userCnic, userEmail, userMobile, userPassword) => {
+exports.registerAndEnrollUser = async (caClient, wallet, orgMspId, userId, affiliation, rolevalue) => {
 	try {
 		// Check to see if we've already enrolled the user
 		const userIdentity = await wallet.get(userId);
@@ -77,12 +77,7 @@ exports.registerAndEnrollUser = async (caClient, wallet, orgMspId, userId, affil
 			affiliation: affiliation,
 			enrollmentID: userId,
 			role: 'client',
-			attrs: [{ name: 'role', value: rolevalue, ecert: true }],
-			userName: userName,
-			userCnic: userCnic,
-			userEmail: userEmail,
-			userMobile: userMobile,
-			userPassword: userPassword,
+			attrs: [{ name: 'role', value: rolevalue, ecert: true }]
 		}, adminUser);
 
 		const enrollment = await caClient.enroll({
@@ -96,11 +91,9 @@ exports.registerAndEnrollUser = async (caClient, wallet, orgMspId, userId, affil
 			},
 			mspId: orgMspId,
 			type: 'X.509',
-			userPassword: userPassword,
 		};
 		await wallet.put(userId, x509Identity);
 		console.log(`Successfully registered and enrolled user ${userId} and imported it into the wallet`);
-		console.log(`Password:  ${userPassword} ` )
 	} catch (error) {
 		console.error(`Failed to register user : ${error}`);
 	}

@@ -1,13 +1,48 @@
-    <h1 class="title">
-        Search Result
-    </h1>
-    <div style="width: 400px; margin: 0px auto; font-size: 20px;">
-        <%for(var i=0; i < label.length; i++){%>
-            <div style="clear: both; float: left; color: rgb(1, 28, 168); width: 100px;"><%=label[i]%></div>
-            <%if(i < 7){%>
-                <div style="float: left; width: 200px; margin-left: 100px;"><%=values[i]%></div>
-            <%} else {%>
-                <a href="https://ipfs.infura.io/ipfs/<%=values[i]%>" style="color: rgb(12, 5, 92); float: left; width: 200px; margin-left: 100px;" target="_blank">View</a>
-            <%}%>
-        <%}%>
-    </div>
+<style>
+    .search-result-container {
+        width: 400px;
+        margin: 0 auto;
+        font-size: 20px;
+        border: 1px solid #ccc;
+        padding: 20px;
+        border-radius: 5px;
+        background-color: #f5f5f5;
+        background-color: #d4f5d0;
+        /* Updated background color */
+    }
+
+    .search-result-label {
+        color: rgb(1, 28, 168);
+        width: 100px;
+        float: left;
+        font-weight: bold;
+    }
+
+    .search-result-value {
+        float: left;
+        width: 200px;
+        margin-left: 20px;
+    }
+
+    .title {
+        color: #333;
+        font-size: 24px;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+</style>
+
+<h1 class="title">
+    Search Result
+</h1>
+<div class="search-result-container">
+    <% for(var i=0; i < label.length; i++) { %>
+        <div class="search-result-label">
+            <%= label[i] %>
+        </div>
+        <div class="search-result-value">
+            <%= values[i] %>
+        </div>
+        <div style="clear: both;"></div>
+        <% } %>
+</div>
