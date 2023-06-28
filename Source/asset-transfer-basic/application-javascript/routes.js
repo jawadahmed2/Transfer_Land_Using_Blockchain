@@ -394,22 +394,22 @@ router.post('/create_asset', function (req, res) {
 					}
 
 					try {
-						const fs = require('fs');
-						const create = require('ipfs-http-client');
-						// Details about project id and project secret are provided in the book
-						const projectId = '2JuAPHltL4jX6CKKvvzejOyO15K';
-						const projectSecret = '1b623e021ab46f73b445a94564557f12';
-						const projectIdAndSecret = `${projectId}:${projectSecret}`;
-						const ipfsClient = create({
-							host: 'ipfs.infura.io',
-							port: 5001,
-							protocol: 'https',
-							headers: {
-								authorization: `Basic ${Buffer.from(projectIdAndSecret).toString(
-									'base64'
-								)}`,
-							},
-						});
+						// const fs = require('fs');
+						// const create = require('ipfs-http-client');
+						// // Details about project id and project secret are provided in the book
+						// const projectId = '2JuAPHltL4jX6CKKvvzejOyO15K';
+						// const projectSecret = '1b623e021ab46f73b445a94564557f12';
+						// const projectIdAndSecret = `${projectId}:${projectSecret}`;
+						// const ipfsClient = create({
+						// 	host: 'ipfs.infura.io',
+						// 	port: 5001,
+						// 	protocol: 'https',
+						// 	headers: {
+						// 		authorization: `Basic ${Buffer.from(projectIdAndSecret).toString(
+						// 			'base64'
+						// 		)}`,
+						// 	},
+						// });
 						// const file = fs.readFileSync(req.body.file);
 						// const buffer = Buffer.from(file);
 						// //console.log(buffer);
@@ -424,7 +424,7 @@ router.post('/create_asset', function (req, res) {
 						// 	console.log(JSON.stringify(item));
 						// 	const filePath = JSON.stringify(item).substring(9, 55);
 						// 	console.log('Value of filePath is:', filePath);
-						console.log('\n--> Submit Transaction: CreateAsset, creates new asset with ID, address, owner, size, price, date, type, and image ');
+						console.log('\n--> Submit Transaction: CreateAsset, creates new asset with ID, address, owner, size, price, date, and type');
 						await contract.submitTransaction('CreateAsset', req.body.id, Address, req.body.size, org1UserId, req.body.value); // remove filePath
 						// 	return;
 						// 	}
@@ -432,10 +432,7 @@ router.post('/create_asset', function (req, res) {
 						// Disconnect from the gateway when the application is closing
 						// This will close all connections to the network
 						gateway.disconnect();
-						res.render('display', {
-							username: org1UserId,
-							errors: {},
-						});
+						res.redirect('/display');
 					}
 				} catch (error) {
 					console.error(`******** FAILED to run the application >>>>>: ${error}`);
@@ -1820,6 +1817,7 @@ router.get('/received_lands', function (req, res) {
 					// data: all_requests
 					values: data,
 				});
+				// res.status(200).json({ success: true });
 			}
 		}
 	}
