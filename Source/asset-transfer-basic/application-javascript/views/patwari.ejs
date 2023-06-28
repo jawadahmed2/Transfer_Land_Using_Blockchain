@@ -49,7 +49,7 @@
                             <th>LandSize</th>
                             <th>Price</th>
                             <th>Date</th>
-                            <th>Request</th>
+                            <th>Status</th>
                             <!-- <th>Documents</th> -->
                         </tr>
                     </thead>
@@ -78,7 +78,7 @@
                                             <%= values[5 + k] %>
                                         </td>
                                         <td>
-                                            <button class="requestBtn">Request To Buy</button>
+                                            <button class="requestBtn">Verified</button>
                                             <!-- <%= values[6 + k] %> -->
                                         </td>
                                         <!-- <td>
@@ -96,41 +96,6 @@
         </center>
         <br><br>
 
-
-        <script>
-            $(document).ready(function () {
-                // Handle button click event
-                $('.requestBtn').click(function () {
-                    var id = $(this).closest('tr').find('td:eq(0)').text().trim(); // Remove spaces from the ID value
-                    console.log(id);
-                    var button = $(this); // Store a reference to the button element
-
-                    // Make AJAX request to post the ID value to the Node.js Express function
-                    $.ajax({
-                        url: '/land_request',
-                        method: 'POST',
-                        data: { id: id },
-                        success: function (response) {
-                            console.log('ID value submitted successfully');
-                            window.location.href = '/requested_lands';
-
-                            // Check the response from the server
-                            if (response.success) {
-                                $('.requestBtn').text('Requested'); // Change button text using the stored reference
-                                $('.requestBtn').attr('disabled', true); // Disable the button to prevent further clicks
-                                // Reload the current page
-                            } else {
-                                console.log('An error occurred: ', response.error);
-                            }
-                        },
-                        error: function (xhr, status, error) {
-                            console.log('An error occurred: ', error);
-                        }
-                    });
-                });
-            });
-
-        </script>
 
 </body>
 

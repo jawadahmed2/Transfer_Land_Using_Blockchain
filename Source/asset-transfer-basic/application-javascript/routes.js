@@ -1603,11 +1603,11 @@ router.post('/login_form', function (req, res) {
 
 
 
-router.get('/patwari', function (req, res) {
-	res.render('patwari', {
-		errors: {}
-	});
-});
+// router.get('/patwari', function (req, res) {
+// 	res.render('patwari', {
+// 		errors: {}
+// 	});
+// });
 
 // router.get('/requested_lands', function (req, res) {
 // 	res.render('requested_lands', {
@@ -1764,63 +1764,68 @@ router.get('/received_lands', function (req, res) {
 		// Call display.ejs file to show the list of assets
 		// res.render('display', { layout: false });
 		async function request(all_requests) {
-			// console.log(all_requests);
-			const buyer_cnic = all_requests[0].buyer_cnic;
-			db.connect(function (err) {
-				let sql = `SELECT * FROM land_record WHERE land_id= '${all_requests[0].land_id}'`;
+			try {
+			  if (!Array.isArray(all_requests) || all_requests.length === 0) {
+				console.log("Invalid or empty 'all_requests' parameter");
+			  }
+
+			  const buyer_cnic = all_requests[0].buyer_cnic;
+			  db.connect(function (err) {
+				if (err) {
+				  console.log("Database connection error:", err);
+				}
+
+				let sql = `SELECT * FROM land_record WHERE land_id = '${all_requests[0].land_id}'`;
 				let sql2 = `SELECT * FROM user WHERE user_cnic = ${buyer_cnic}`;
+
 				let query = db.query(sql, async (err, result) => {
-					if (err) {
-						console.log("Data Not Found");
-					}
-					console.log('Working');
-					const fetchedResult = result;
-					// console.log(fetchedResult);
+				  if (err) {
+					console.log("Data not found in land_record table");
+					throw new Error("Failed to fetch data from the land_record table");
+				  }
 
-					const Address = fetchedResult[0].khatuni + ' ' + fetchedResult[0].mauza + ' ' + fetchedResult[0].tehsil + ' ' +
-						fetchedResult[0].district + ' ' + 'Punjab' + ' ' + 'Pakistan';
-					const Land_id = fetchedResult[0].land_id;
-					// const buyer_cnic = all_requests[0].buyer_cnic;
-					// console.log(Address);
-					// let Status;
-					if (all_requests[0].status == 0) {
+				  const fetchedResult = result;
+				  const Address = fetchedResult[0].khatuni + ' ' + fetchedResult[0].mauza + ' ' + fetchedResult[0].tehsil + ' ' +
+					fetchedResult[0].district + ' ' + 'Punjab' + ' ' + 'Pakistan';
+				  const Land_id = fetchedResult[0].land_id;
 
-						let data = [];
-						// eslint-disable-next-line no-use-before-define
-						// await requested_data(data);
-						db.query(sql2, async (err, result2) => {
-							if (err) {
-								console.log("Data Not Found");
-							}
-							const buyer_cnic = result2[0].username;
-							data.push(buyer_cnic); // Add seller name to the data array
-							data.push(Land_id);
-							data.push(Address);
-							console.log(data);
+				  if (all_requests[0].status == 0) {
+					let data = [];
+					db.query(sql2, async (err, result2) => {
+					  if (err) {
+						console.log("Data not found in user table");
+						throw new Error("Failed to fetch data from the user table");
+					  }
 
-							// eslint-disable-next-line no-use-before-define
-							await requested_data(data);
-						});
-					} else {
-						res.render('received_lands', {
-							// layout: false,
-							// data: all_requests
-							values: [],
-						});
-					}
+					  const buyer_cnic = result2[0].username;
+					  data.push(buyer_cnic); // Add seller name to the data array
+					  data.push(Land_id);
+					  data.push(Address);
 
+					  // eslint-disable-next-line no-use-before-define
+					  await requested_data(data);
+					});
+				  } else {
+					res.render('received_lands', {
+					  values: [],
+					});
+				  }
 				});
-			});
-
-			async function requested_data(data) {
-				res.render('received_lands', {
-					// layout: false,
-					// data: all_requests
-					values: data,
-				});
-				// res.status(200).json({ success: true });
+			  });
+			} catch (error) {
+			  console.log("Error occurred:", error.message);
+			  res.render('received_lands', {
+				values: [],
+			  });
 			}
-		}
+		  }
+
+		  async function requested_data(data) {
+			res.render('received_lands', {
+			  values: data,
+			});
+		  }
+
 	}
 	main();
 });
