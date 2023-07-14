@@ -17,6 +17,7 @@
 const express = require('express');
 const { NONE } = require('fabric-network/lib/impl/event/defaulteventhandlerstrategies.js');
 const router = express.Router();
+router.use(express.urlencoded({ extended: true }));
 
 // The router object is used in web applications to handle requests.
 // router.post() refers to POST requests and router.get() referes to GET request.
@@ -826,9 +827,7 @@ router.post('/register_user', function (req, res) {
 	if (!req.body.userId) {
 		errors.push('User id must be provided');
 	}
-	if (!req.body.role) {
-		errors.push('A role must be selected for the new user');
-	}
+
 	if (errors.length > 0) {
 		res.render('register_user_form', {
 			errors: errors,
@@ -897,6 +896,77 @@ router.post('/register_user', function (req, res) {
 	}
 });
 
+// Make API for Flutter
+
+router.post('/register_user_api', function (req, res) {
+	console.log('Request Received');
+    let errors = [];
+	console.log(req.body);
+    if (!req.body.userId) {
+        errors.push('User id must be provided');
+    }
+
+    if (errors.length > 0) {
+        res.json({
+            errors: errors,
+            success: {}
+        });
+    } else {
+        'use strict';
+
+        const { Gateway, Wallets } = require('fabric-network');
+        const FabricCAServices = require('fabric-ca-client');
+        const path = require('path');
+        const { buildCAClient, registerAndEnrollUser, enrollAdmin } = require('../../test-application/javascript/CAUtil.js');
+        const { buildCCPOrg1, buildWallet } = require('../../test-application/javascript/AppUtil.js');
+
+        const channelName = 'mychannel';
+        const chaincodeName = 'basic';
+        const mspOrg1 = 'Org1MSP';
+        const walletPath = path.join(__dirname, 'wallet');
+        const org1UserId = req.body.userId;
+
+        function prettyJSONString(inputString) {
+            return JSON.stringify(JSON.parse(inputString), null, 2);
+        }
+
+        async function main() {
+            try {
+                const ccp = buildCCPOrg1();
+                const caClient = buildCAClient(FabricCAServices, ccp, 'ca.org1.example.com');
+                const wallet = await buildWallet(Wallets, walletPath);
+                const userIdentity = await wallet.get(org1UserId);
+                if (userIdentity) {
+                    console.log(`An identity for the user ${org1UserId} already exists in the wallet`);
+                }
+                await registerAndEnrollUser(caClient, wallet, mspOrg1, org1UserId, 'org1.department1', 'Creator');
+                console.log('Creator', req.body.username, req.body.password);
+            } catch (error) {
+                console.error(`******** FAILED to run the application: ${error}`);
+            }
+        }
+
+        main();
+        try {
+            // do something before waiting
+            setTimeout(function () {
+                // create some context
+                const context = {
+                    UserId: req.body.userId,
+                    UserPassword: req.body.password,
+                    UserCnic: req.body.cnic
+                };
+                res.redirect('/register_new_user_form?context=' + JSON.stringify(context));
+            }, 800);
+        } catch (error) {
+            res.json({
+                errors: {},
+                success: {}
+            });
+        }
+    }
+});
+
 router.get('/register_new_user_form', function (req, res) {
 	'use strict';
 
@@ -922,8 +992,15 @@ router.get('/register_new_user_form', function (req, res) {
 
 
 	function prettyJSONString(inputString) {
-		return JSON.stringify(JSON.parse(inputString), null, 2);
-	}
+		try {
+		  const parsedJSON = JSON.parse(inputString);
+		  return JSON.stringify(parsedJSON, null, 2);
+		} catch (error) {
+		  console.error('Failed to parse JSON:', error);
+		  return '';
+		}
+	  }
+
 
 	async function main() {
 		try {
@@ -1219,9 +1296,8 @@ router.get('/login_form', function (req, res) {
 		errors: {}
 	});
 
-
-
 });
+
 router.post('/login_form', function (req, res) {
 	let errors = [];
 	if (!req.body.cnic) {

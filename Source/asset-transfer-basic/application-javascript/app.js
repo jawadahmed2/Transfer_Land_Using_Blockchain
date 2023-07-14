@@ -27,6 +27,9 @@ const express = require('express');
 // set up our entire server.
 const app = express();
 
+const cors = require("cors");
+app.use(cors());
+
 // The Embedded JavaScript file layout.ejs in the views folder acts as the default layout for all server
 // side views rendered by this app. Before one of your custom views is sent to the client, it is injected
 // into this file. It is this file that is actually sent to the client.
