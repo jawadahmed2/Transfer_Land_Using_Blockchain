@@ -1,4 +1,7 @@
 /* eslint-disable linebreak-style */
+// eslint-disable-next-line linebreak-style
+/* eslint-disable no-use-before-define */
+/* eslint-disable linebreak-style */
 /* eslint-disable curly */
 /* eslint-disable quotes */
 /* eslint-disable linebreak-style */
@@ -900,71 +903,71 @@ router.post('/register_user', function (req, res) {
 
 router.post('/register_user_api', function (req, res) {
 	console.log('Request Received');
-    let errors = [];
+	let errors = [];
 	console.log(req.body);
-    if (!req.body.userId) {
-        errors.push('User id must be provided');
-    }
+	if (!req.body.userId) {
+		errors.push('User id must be provided');
+	}
 
-    if (errors.length > 0) {
-        res.json({
-            errors: errors,
-            success: {}
-        });
-    } else {
-        'use strict';
+	if (errors.length > 0) {
+		res.json({
+			errors: errors,
+			success: {}
+		});
+	} else {
+		'use strict';
 
-        const { Gateway, Wallets } = require('fabric-network');
-        const FabricCAServices = require('fabric-ca-client');
-        const path = require('path');
-        const { buildCAClient, registerAndEnrollUser, enrollAdmin } = require('../../test-application/javascript/CAUtil.js');
-        const { buildCCPOrg1, buildWallet } = require('../../test-application/javascript/AppUtil.js');
+		const { Gateway, Wallets } = require('fabric-network');
+		const FabricCAServices = require('fabric-ca-client');
+		const path = require('path');
+		const { buildCAClient, registerAndEnrollUser, enrollAdmin } = require('../../test-application/javascript/CAUtil.js');
+		const { buildCCPOrg1, buildWallet } = require('../../test-application/javascript/AppUtil.js');
 
-        const channelName = 'mychannel';
-        const chaincodeName = 'basic';
-        const mspOrg1 = 'Org1MSP';
-        const walletPath = path.join(__dirname, 'wallet');
-        const org1UserId = req.body.userId;
+		const channelName = 'mychannel';
+		const chaincodeName = 'basic';
+		const mspOrg1 = 'Org1MSP';
+		const walletPath = path.join(__dirname, 'wallet');
+		const org1UserId = req.body.userId;
 
-        function prettyJSONString(inputString) {
-            return JSON.stringify(JSON.parse(inputString), null, 2);
-        }
+		function prettyJSONString(inputString) {
+			return JSON.stringify(JSON.parse(inputString), null, 2);
+		}
 
-        async function main() {
-            try {
-                const ccp = buildCCPOrg1();
-                const caClient = buildCAClient(FabricCAServices, ccp, 'ca.org1.example.com');
-                const wallet = await buildWallet(Wallets, walletPath);
-                const userIdentity = await wallet.get(org1UserId);
-                if (userIdentity) {
-                    console.log(`An identity for the user ${org1UserId} already exists in the wallet`);
-                }
-                await registerAndEnrollUser(caClient, wallet, mspOrg1, org1UserId, 'org1.department1', 'Creator');
-                console.log('Creator', req.body.username, req.body.password);
-            } catch (error) {
-                console.error(`******** FAILED to run the application: ${error}`);
-            }
-        }
+		async function main() {
+			try {
+				const ccp = buildCCPOrg1();
+				const caClient = buildCAClient(FabricCAServices, ccp, 'ca.org1.example.com');
+				const wallet = await buildWallet(Wallets, walletPath);
+				const userIdentity = await wallet.get(org1UserId);
+				if (userIdentity) {
+					console.log(`An identity for the user ${org1UserId} already exists in the wallet`);
+				}
+				await registerAndEnrollUser(caClient, wallet, mspOrg1, org1UserId, 'org1.department1', 'Creator');
+				console.log('Creator', req.body.userId, req.body.password);
+			} catch (error) {
+				console.error(`******** FAILED to run the application: ${error}`);
+			}
+		}
 
-        main();
-        try {
-            // do something before waiting
-            setTimeout(function () {
-                // create some context
-                const context = {
-                    UserId: req.body.userId,
-                    UserPassword: req.body.password,
-                    UserCnic: req.body.cnic
-                };
-                res.redirect('/register_new_user_form?context=' + JSON.stringify(context));
-            }, 800);
-        } catch (error) {
-            res.json({
-                errors: {},
-                success: {}
-            });
-        }
-    }
+		main();
+		try {
+			// do something before waiting
+			setTimeout(function () {
+				// create some context
+				const context = {
+					UserId: req.body.userId,
+					UserPassword: req.body.password,
+					UserCnic: req.body.cnic
+				};
+				res.redirect('/register_new_user_form?context=' + JSON.stringify(context));
+			}, 800);
+		} catch (error) {
+			res.json({
+				errors: {},
+				success: {}
+			});
+		}
+	}
 });
 
 router.get('/register_new_user_form', function (req, res) {
@@ -988,18 +991,19 @@ router.get('/register_new_user_form', function (req, res) {
 	const org1UserId = context.UserId;
 	const userPassword = context.UserPassword;
 	const userCnic = context.UserCnic;
+	console.log(org1UserId, userPassword, userCnic);
 
 
 
 	function prettyJSONString(inputString) {
 		try {
-		  const parsedJSON = JSON.parse(inputString);
-		  return JSON.stringify(parsedJSON, null, 2);
+			const parsedJSON = JSON.parse(inputString);
+			return JSON.stringify(parsedJSON, null, 2);
 		} catch (error) {
-		  console.error('Failed to parse JSON:', error);
-		  return '';
+			console.error('Failed to parse JSON:', error);
+			return '';
 		}
-	  }
+	}
 
 
 	async function main() {
@@ -1678,6 +1682,677 @@ router.post('/login_form', function (req, res) {
 
 
 
+// Login Flutter API
+
+// router.post('/login_api', function (req, res) {
+// 	console.log('Flutter Login Request Received Successfully');
+// 	let errors = [];
+// 	if (!req.body.cnic) {
+// 		errors.push('User cnic must be provided');
+// 	}
+// 	if (!req.body.pw) {
+// 		errors.push('Password must be provided');
+// 	}
+// 	if (errors.length > 0) {
+// 		res.status(400).json({ errors: errors });
+// 	}
+// 	else {
+// 		// a variable to save a session
+// 		let session;
+// 		session = req.session;
+// 		session.userid = req.body.cnic;
+// 		console.log(req.session);
+
+// 		'use strict';
+
+// 		const { Gateway, Wallets } = require('fabric-network');
+// 		const FabricCAServices = require('fabric-ca-client');
+// 		const path = require('path');
+// 		const { buildCAClient, registerAndEnrollUser, enrollAdmin } = require('../../test-application/javascript/CAUtil.js');
+// 		const { buildCCPOrg1, buildWallet } = require('../../test-application/javascript/AppUtil.js');
+
+// 		const channelName = 'mychannel';
+// 		const chaincodeName = 'basic';
+// 		const mspOrg1 = 'Org1MSP';
+// 		const walletPath = path.join(__dirname, 'wallet');
+// 		const mysql = require('mysql');
+
+// 		const UserCnic = req.body.cnic;
+// 		const UserPassword = req.body.pw;
+
+
+
+// 		function prettyJSONString(inputString) {
+// 			return JSON.stringify(JSON.parse(inputString), null, 2);
+// 		}
+
+// 		async function main() {
+// 			try {
+// 				// build an in memory object with the network configuration (also known as a connection profile)
+// 				const ccp = buildCCPOrg1();
+
+// 				// build an instance of the fabric ca services client based on
+// 				// the information in the network configuration
+// 				const caClient = buildCAClient(FabricCAServices, ccp, 'ca.org1.example.com');
+
+// 				// setup the wallet to hold the credentials of the application user
+// 				const wallet = await buildWallet(Wallets, walletPath);
+
+// 				// in a real application this would be done on an administrative flow, and only once
+// 				await enrollAdmin(caClient, wallet, mspOrg1);
+
+// 				// in a real application this would be done only when a new user was required to be added
+// 				// and would be part of an administrative flow
+// 				//await registerAndEnrollUser(caClient, wallet, mspOrg1, org1UserId, 'org1.department1');
+
+// 				// Create a new gateway instance for interacting with the fabric network.
+// 				// In a real application this would be done as the backend server session is setup for
+// 				// a user that has been verified.
+// 				const gateway = new Gateway();
+// 				//Create Connections
+
+// 				const db = mysql.createConnection({
+// 					host: 'localhost',
+// 					user: 'root',
+// 					password: '',
+// 					database: 'test',
+// 				});
+// 				// connect to database
+// 				db.connect((err) => {
+// 					if (err) {
+// 						console.log(err);
+// 					}
+// 					console.log('Connection done');
+// 				});
+// 				db.connect(function (err) {
+// 					let sql = `SELECT * FROM user WHERE user_cnic= ${UserCnic}`;
+// 					let query = db.query(sql, async (err, result) => {
+// 						if (err) {
+// 							console.log("Data Not Found");
+// 						}
+// 						// console.log(result);
+// 						const fetchedResult = result;
+
+// 						const org1UserId = fetchedResult[0].username;
+// 						const private_key = fetchedResult[0].private_key;
+
+// 						if (fetchedResult[0].password == UserPassword) {
+// 							// Call a function or perform actions that rely on the fetched data
+// 							// eslint-disable-next-line no-use-before-define
+// 							if (org1UserId == 'Patwari') {
+// 								try {
+// 									const userIdentity = await wallet.get(org1UserId);
+// 									if (!userIdentity) {
+// 										console.log(`An identity for the user ${org1UserId} does not exist in the wallet`);
+// 										res.render('login_form', {
+// 											errors: 'An identity for the user ' + org1UserId + ' does not exist in the wallet'
+// 										});
+// 										return;
+// 									}
+// 									// Take hash between -----PRIVATE KEY----- and ---END PRIVATE KEY---
+// 									// Press ctrl+f and remove \r\n from the hash and use it as password
+// 									if (userIdentity && userIdentity.type === 'X.509') {
+// 										const pk1 = userIdentity.credentials.privateKey.substr(27, 66);
+// 										const pk2 = userIdentity.credentials.privateKey.substr(95, 64);
+// 										const pk3 = userIdentity.credentials.privateKey.substr(161, 56);
+// 										const privateKey = pk1.trim() + pk2.trim() + pk3.trim();
+// 										if (private_key != privateKey) {
+// 											res.render('login_form', {
+// 												errors: 'You have provided an invalid password'
+// 											});
+// 											return;
+// 										}
+// 									}
+// 									// setup the gateway instance
+// 									// The user will now be able to create connections to the fabric network and be able to
+// 									// submit transactions and query. All transactions submitted by this gateway will be
+// 									// signed by this user using the credentials stored in the wallet.
+// 									await gateway.connect(ccp, {
+// 										wallet,
+// 										identity: org1UserId,
+// 										discovery: { enabled: true, asLocalhost: true } // using asLocalhost as this gateway is using a fabric network deployed locally
+// 									});
+
+// 									// Build a network instance based on the channel where the smart contract is deployed
+// 									const network = await gateway.getNetwork(channelName);
+
+// 									// Get the contract from the network.
+// 									const contract = network.getContract(chaincodeName);
+
+// 									// Initialize a set of asset data on the channel using the chaincode 'InitLedger' function.
+// 									// This type of transaction would only be run once by an application the first time it was started after it
+// 									// is deployed the first time. Any updates to the chaincode deployed later would likely not need to run
+// 									// an "init" type function.
+// 									// Comment out this line after first execution and restart server.
+// 									let assetsExist = await contract.evaluateTransaction('AssetExists', 'asset1');
+// 									// add initial assets only when they do not exist
+// 									if (assetsExist == 'false') {
+// 										await contract.submitTransaction('InitLedger');
+// 										console.log('*** Result: committed');
+// 									}
+// 									// Let's try a query type operation (function).
+// 									// This will be sent to just one peer and the results will be shown.
+// 									console.log('\n--> Evaluate Transaction: GetAllAssets, function returns all the current assets on the ledger');
+// 									let result = await contract.evaluateTransaction('GetAllAssets');
+// 									console.log(`*** Result: ${prettyJSONString(result.toString())}`);
+
+// 									let data = result.toString();
+// 									let data2 = [];
+// 									let label = [];
+// 									let values = [];
+// 									// remove {} [] ""
+// 									for (var i = 0; i < data.length; i++) {
+// 										if (data[i] != '{' && data[i] != '}' && data[i] != '{' && data[i] != '"' && data[i] != '[' && data[i] != ']') {
+// 											data2.push(data[i]);
+// 										}
+// 									}
+// 									// Get Labels (Key, make, model, colour, owner)
+// 									let string;
+// 									let j;
+// 									for (var i = 0; i < data2.length; i++) {
+// 										string = '';
+// 										if (i == 0 || data2[i] == ',') {
+// 											// Eliminite the word 'Record'
+// 											if (data2[i + 1] == 'R' && data2[i + 2] == 'e' && data2[i + 3] == 'c' && data2[i + 4] == 'o' && data2[i + 5] == 'r' && data2[i + 6] == 'd') {
+// 												i += 7;
+// 											}
+// 											if (i == 0) {
+// 												j = i;
+// 											}
+// 											else {
+// 												j = i + 1;
+// 											}
+// 											while (data2[j] != ':') {
+// 												string += data2[j];
+// 												j++;
+// 											}
+// 											label.push(string);
+// 											i = --j;
+// 										}
+// 									}
+// 									// Get Values (CAR0, Toyota, Prius, blue, Tomoko)
+// 									for (var i = 0; i < data2.length; i++) {
+// 										string = '';
+// 										if (data2[i] == ':') {
+// 											j = i + 1;
+// 											while (data2[j] != ',') {
+// 												if (j == data2.length - 1) {
+// 													string += data2[j];
+// 													break;
+// 												}
+// 												string += data2[j];
+// 												j++;
+// 											}
+// 											if (string != '') {
+// 												values.push(string);
+// 											}
+// 											i = --j;
+// 										}
+// 									}
+// 									// Call display.ejs from the view folder to display all assets
+// 									// res.render('display', { layout: false });
+
+// 									const responseData = {
+// 										label: label,
+// 										values: values,
+// 										username: org1UserId
+// 									  };
+
+// 									  res.status(200).json(responseData);
+
+// 								} finally {
+// 									// Disconnect from the gateway when the application is closing
+// 									// This will close all connections to the network
+// 									gateway.disconnect();
+// 								}
+
+
+// 							} else {
+// 								// eslint-disable-next-line no-use-before-define
+// 								await validation(org1UserId, private_key);
+// 							}
+
+// 						} else {
+// 							// eslint-disable-next-line no-use-before-define
+// 							res.status(400).json({ errors: errors });
+
+// 						}
+
+// 					});
+// 				});
+
+// 				async function validation(org1UserId, private_key) {
+// 					try {
+// 						const userIdentity = await wallet.get(org1UserId);
+// 						if (!userIdentity) {
+// 							console.log(`An identity for the user ${org1UserId} does not exist in the wallet`);
+// 							res.render('login_form', {
+// 								errors: 'An identity for the user ' + org1UserId + ' does not exist in the wallet'
+// 							});
+// 							return;
+// 						}
+// 						// Take hash between -----PRIVATE KEY----- and ---END PRIVATE KEY---
+// 						// Press ctrl+f and remove \r\n from the hash and use it as password
+// 						if (userIdentity && userIdentity.type === 'X.509') {
+// 							const pk1 = userIdentity.credentials.privateKey.substr(27, 66);
+// 							const pk2 = userIdentity.credentials.privateKey.substr(95, 64);
+// 							const pk3 = userIdentity.credentials.privateKey.substr(161, 56);
+// 							const privateKey = pk1.trim() + pk2.trim() + pk3.trim();
+// 							if (private_key != privateKey) {
+// 								res.render('login_form', {
+// 									errors: 'You have provided an invalid password'
+// 								});
+// 								return;
+// 							}
+// 						}
+// 						// setup the gateway instance
+// 						// The user will now be able to create connections to the fabric network and be able to
+// 						// submit transactions and query. All transactions submitted by this gateway will be
+// 						// signed by this user using the credentials stored in the wallet.
+// 						await gateway.connect(ccp, {
+// 							wallet,
+// 							identity: org1UserId,
+// 							discovery: { enabled: true, asLocalhost: true } // using asLocalhost as this gateway is using a fabric network deployed locally
+// 						});
+
+// 						// Build a network instance based on the channel where the smart contract is deployed
+// 						const network = await gateway.getNetwork(channelName);
+
+// 						// Get the contract from the network.
+// 						const contract = network.getContract(chaincodeName);
+
+// 						// Initialize a set of asset data on the channel using the chaincode 'InitLedger' function.
+// 						// This type of transaction would only be run once by an application the first time it was started after it
+// 						// is deployed the first time. Any updates to the chaincode deployed later would likely not need to run
+// 						// an "init" type function.
+// 						// Comment out this line after first execution and restart server.
+// 						let assetsExist = await contract.evaluateTransaction('AssetExists', 'asset1');
+// 						// add initial assets only when they do not exist
+// 						if (assetsExist == 'false') {
+// 							await contract.submitTransaction('InitLedger');
+// 							console.log('*** Result: committed');
+// 						}
+// 						// Let's try a query type operation (function).
+// 						// This will be sent to just one peer and the results will be shown.
+// 						console.log('\n--> Evaluate Transaction: GetAllAssets, function returns all the current assets on the ledger');
+// 						let result = await contract.evaluateTransaction('GetAllAssets');
+// 						console.log(`*** Result: ${prettyJSONString(result.toString())}`);
+
+// 						let data = result.toString();
+// 						let data2 = [];
+// 						let label = [];
+// 						let values = [];
+// 						// remove {} [] ""
+// 						for (var i = 0; i < data.length; i++) {
+// 							if (data[i] != '{' && data[i] != '}' && data[i] != '{' && data[i] != '"' && data[i] != '[' && data[i] != ']') {
+// 								data2.push(data[i]);
+// 							}
+// 						}
+// 						// Get Labels (Key, make, model, colour, owner)
+// 						let string;
+// 						let j;
+// 						for (var i = 0; i < data2.length; i++) {
+// 							string = '';
+// 							if (i == 0 || data2[i] == ',') {
+// 								// Eliminite the word 'Record'
+// 								if (data2[i + 1] == 'R' && data2[i + 2] == 'e' && data2[i + 3] == 'c' && data2[i + 4] == 'o' && data2[i + 5] == 'r' && data2[i + 6] == 'd') {
+// 									i += 7;
+// 								}
+// 								if (i == 0) {
+// 									j = i;
+// 								}
+// 								else {
+// 									j = i + 1;
+// 								}
+// 								while (data2[j] != ':') {
+// 									string += data2[j];
+// 									j++;
+// 								}
+// 								label.push(string);
+// 								i = --j;
+// 							}
+// 						}
+// 						// Get Values (CAR0, Toyota, Prius, blue, Tomoko)
+// 						for (var i = 0; i < data2.length; i++) {
+// 							string = '';
+// 							if (data2[i] == ':') {
+// 								j = i + 1;
+// 								while (data2[j] != ',') {
+// 									if (j == data2.length - 1) {
+// 										string += data2[j];
+// 										break;
+// 									}
+// 									string += data2[j];
+// 									j++;
+// 								}
+// 								if (string != '') {
+// 									values.push(string);
+// 								}
+// 								i = --j;
+// 							}
+// 						}
+// 						// Call display.ejs from the view folder to display all assets
+// 						// res.render('display', { layout: false });
+
+// 						const responseData = {
+// 							label: label,
+// 							values: values,
+// 							username: org1UserId
+// 						  };
+
+// 						  res.status(200).json(responseData);
+
+// 					} finally {
+// 						// Disconnect from the gateway when the application is closing
+// 						// This will close all connections to the network
+// 						gateway.disconnect();
+// 					}
+// 				}
+// 			} catch (error) {
+// 				console.error(`******** FAILED to run the application: ${error}`);
+// 				res.status(400).json({ errors: errors });
+// 			}
+// 		}
+// 		main();
+// 	}
+// });
+
+router.post('/login_api', function (req, res) {
+	console.log('Flutter Login Request Received Successfully');
+	let errors = [];
+	if (!req.body.cnic) {
+	  errors.push('User CNIC must be provided');
+	}
+	if (!req.body.pw) {
+	  errors.push('Password must be provided');
+	}
+	if (errors.length > 0) {
+	  return res.status(400).json({ errors: errors });
+	}
+
+	let session;
+	session = req.session;
+	session.userid = req.body.cnic;
+	console.log(req.session);
+
+	const { Gateway, Wallets } = require('fabric-network');
+	const FabricCAServices = require('fabric-ca-client');
+	const path = require('path');
+	const { buildCAClient, registerAndEnrollUser, enrollAdmin } = require('../../test-application/javascript/CAUtil.js');
+	const { buildCCPOrg1, buildWallet } = require('../../test-application/javascript/AppUtil.js');
+
+	const channelName = 'mychannel';
+	const chaincodeName = 'basic';
+	const mspOrg1 = 'Org1MSP';
+	const walletPath = path.join(__dirname, 'wallet');
+	const mysql = require('mysql');
+
+	const UserCnic = req.body.cnic;
+	const UserPassword = req.body.pw;
+
+	function prettyJSONString(inputString) {
+	  return JSON.stringify(JSON.parse(inputString), null, 2);
+	}
+
+	async function main() {
+	  try {
+		const ccp = buildCCPOrg1();
+		const caClient = buildCAClient(FabricCAServices, ccp, 'ca.org1.example.com');
+		const wallet = await buildWallet(Wallets, walletPath);
+		await enrollAdmin(caClient, wallet, mspOrg1);
+
+		const gateway = new Gateway();
+		const db = mysql.createConnection({
+		  host: 'localhost',
+		  user: 'root',
+		  password: '',
+		  database: 'test',
+		});
+		db.connect((err) => {
+		  if (err) {
+			console.log(err);
+			return res.status(500).json({ error: 'Failed to connect to the database' });
+		  }
+		  console.log('Connection done');
+		});
+
+		db.connect(async function (err) {
+		  let sql = `SELECT * FROM user WHERE user_cnic=${UserCnic}`;
+		  let query = db.query(sql, async (err, result) => {
+			if (err) {
+			  console.log('Data Not Found');
+			  return res.status(400).json({ error: 'Data Not Found' });
+			}
+			const fetchedResult = result;
+			const org1UserId = fetchedResult[0].username;
+			const private_key = fetchedResult[0].private_key;
+
+			if (fetchedResult[0].password != UserPassword) {
+			  return res.status(400).json({ error: 'Invalid password' });
+			}
+
+			if (org1UserId === 'Patwari') {
+			  try {
+				const userIdentity = await wallet.get(org1UserId);
+				if (!userIdentity) {
+				  console.log(`An identity for the user ${org1UserId} does not exist in the wallet`);
+				  return res.status(400).json({ error: `An identity for the user ${org1UserId} does not exist in the wallet` });
+				}
+
+				const pk1 = userIdentity.credentials.privateKey.substr(27, 66);
+				const pk2 = userIdentity.credentials.privateKey.substr(95, 64);
+				const pk3 = userIdentity.credentials.privateKey.substr(161, 56);
+				const privateKey = pk1.trim() + pk2.trim() + pk3.trim();
+
+				if (private_key !== privateKey) {
+				  return res.status(400).json({ error: 'Invalid password' });
+				}
+
+				await gateway.connect(ccp, {
+				  wallet,
+				  identity: org1UserId,
+				  discovery: { enabled: true, asLocalhost: true },
+				});
+
+				const network = await gateway.getNetwork(channelName);
+				const contract = network.getContract(chaincodeName);
+
+				let assetsExist = await contract.evaluateTransaction('AssetExists', 'asset1');
+				if (assetsExist === 'false') {
+				  await contract.submitTransaction('InitLedger');
+				  console.log('*** Result: committed');
+				}
+
+				console.log('\n--> Evaluate Transaction: GetAllAssets, function returns all the current assets on the ledger');
+				let result = await contract.evaluateTransaction('GetAllAssets');
+				console.log(`*** Result: ${prettyJSONString(result.toString())}`);
+
+				let data = result.toString();
+				let data2 = [];
+				let label = [];
+				let values = [];
+
+				for (var i = 0; i < data.length; i++) {
+				  if (data[i] != '{' && data[i] != '}' && data[i] != '{' && data[i] != '"' && data[i] != '[' && data[i] != ']') {
+					data2.push(data[i]);
+				  }
+				}
+
+				let string;
+				let j;
+
+				for (var i = 0; i < data2.length; i++) {
+				  string = '';
+				  if (i == 0 || data2[i] == ',') {
+					if (data2[i + 1] == 'R' && data2[i + 2] == 'e' && data2[i + 3] == 'c' && data2[i + 4] == 'o' && data2[i + 5] == 'r' && data2[i + 6] == 'd') {
+					  i += 7;
+					}
+					if (i == 0) {
+					  j = i;
+					} else {
+					  j = i + 1;
+					}
+					while (data2[j] != ':') {
+					  string += data2[j];
+					  j++;
+					}
+					label.push(string);
+					i = --j;
+				  }
+				}
+
+				for (var i = 0; i < data2.length; i++) {
+				  string = '';
+				  if (data2[i] == ':') {
+					j = i + 1;
+					while (data2[j] != ',') {
+					  if (j == data2.length - 1) {
+						string += data2[j];
+						break;
+					  }
+					  string += data2[j];
+					  j++;
+					}
+					if (string != '') {
+					  values.push(string);
+					}
+					i = --j;
+				  }
+				}
+
+				const responseData = {
+				  label: label,
+				  values: values,
+				  username: org1UserId
+				};
+
+				return res.status(200).json(responseData);
+			  } finally {
+				gateway.disconnect();
+			  }
+			} else {
+			  await validation(org1UserId, private_key);
+			}
+		  });
+		});
+
+		async function validation(org1UserId, private_key) {
+		  try {
+			const userIdentity = await wallet.get(org1UserId);
+			if (!userIdentity) {
+			  console.log(`An identity for the user ${org1UserId} does not exist in the wallet`);
+			  return res.status(400).json({ error: `An identity for the user ${org1UserId} does not exist in the wallet` });
+			}
+
+			const pk1 = userIdentity.credentials.privateKey.substr(27, 66);
+			const pk2 = userIdentity.credentials.privateKey.substr(95, 64);
+			const pk3 = userIdentity.credentials.privateKey.substr(161, 56);
+			const privateKey = pk1.trim() + pk2.trim() + pk3.trim();
+
+			if (private_key !== privateKey) {
+			  return res.status(400).json({ error: 'Invalid password' });
+			}
+
+			await gateway.connect(ccp, {
+			  wallet,
+			  identity: org1UserId,
+			  discovery: { enabled: true, asLocalhost: true },
+			});
+
+			const network = await gateway.getNetwork(channelName);
+			const contract = network.getContract(chaincodeName);
+
+			let assetsExist = await contract.evaluateTransaction('AssetExists', 'asset1');
+			if (assetsExist === 'false') {
+			  await contract.submitTransaction('InitLedger');
+			  console.log('*** Result: committed');
+			}
+
+			console.log('\n--> Evaluate Transaction: GetAllAssets, function returns all the current assets on the ledger');
+			let result = await contract.evaluateTransaction('GetAllAssets');
+			console.log(`*** Result: ${prettyJSONString(result.toString())}`);
+
+			let data = result.toString();
+			let data2 = [];
+			let label = [];
+			let values = [];
+
+			for (var i = 0; i < data.length; i++) {
+			  if (data[i] != '{' && data[i] != '}' && data[i] != '{' && data[i] != '"' && data[i] != '[' && data[i] != ']') {
+				data2.push(data[i]);
+			  }
+			}
+
+			let string;
+			let j;
+
+			for (var i = 0; i < data2.length; i++) {
+			  string = '';
+			  if (i == 0 || data2[i] == ',') {
+				if (data2[i + 1] == 'R' && data2[i + 2] == 'e' && data2[i + 3] == 'c' && data2[i + 4] == 'o' && data2[i + 5] == 'r' && data2[i + 6] == 'd') {
+				  i += 7;
+				}
+				if (i == 0) {
+				  j = i;
+				} else {
+				  j = i + 1;
+				}
+				while (data2[j] != ':') {
+				  string += data2[j];
+				  j++;
+				}
+				label.push(string);
+				i = --j;
+			  }
+			}
+
+			for (var i = 0; i < data2.length; i++) {
+			  string = '';
+			  if (data2[i] == ':') {
+				j = i + 1;
+				while (data2[j] != ',') {
+				  if (j == data2.length - 1) {
+					string += data2[j];
+					break;
+				  }
+				  string += data2[j];
+				  j++;
+				}
+				if (string != '') {
+				  values.push(string);
+				}
+				i = --j;
+			  }
+			}
+
+			const responseData = {
+			  label: label,
+			  values: values,
+			  username: org1UserId
+			};
+
+			return res.status(200).json(responseData);
+		  } finally {
+			gateway.disconnect();
+		  }
+		}
+	  } catch (error) {
+		console.error(`******** FAILED to run the application: ${error}`);
+		return res.status(400).json({ error: 'Failed to run the application' });
+	  }
+	}
+
+	main();
+  });
+
+
+
+
+
+
+
+
+
 
 // router.get('/patwari', function (req, res) {
 // 	res.render('patwari', {
@@ -1841,66 +2516,66 @@ router.get('/received_lands', function (req, res) {
 		// res.render('display', { layout: false });
 		async function request(all_requests) {
 			try {
-			  if (!Array.isArray(all_requests) || all_requests.length === 0) {
-				console.log("Invalid or empty 'all_requests' parameter");
-			  }
-
-			  const buyer_cnic = all_requests[0].buyer_cnic;
-			  db.connect(function (err) {
-				if (err) {
-				  console.log("Database connection error:", err);
+				if (!Array.isArray(all_requests) || all_requests.length === 0) {
+					console.log("Invalid or empty 'all_requests' parameter");
 				}
 
-				let sql = `SELECT * FROM land_record WHERE land_id = '${all_requests[0].land_id}'`;
-				let sql2 = `SELECT * FROM user WHERE user_cnic = ${buyer_cnic}`;
+				const buyer_cnic = all_requests[0].buyer_cnic;
+				db.connect(function (err) {
+					if (err) {
+						console.log("Database connection error:", err);
+					}
 
-				let query = db.query(sql, async (err, result) => {
-				  if (err) {
-					console.log("Data not found in land_record table");
-					throw new Error("Failed to fetch data from the land_record table");
-				  }
+					let sql = `SELECT * FROM land_record WHERE land_id = '${all_requests[0].land_id}'`;
+					let sql2 = `SELECT * FROM user WHERE user_cnic = ${buyer_cnic}`;
 
-				  const fetchedResult = result;
-				  const Address = fetchedResult[0].khatuni + ' ' + fetchedResult[0].mauza + ' ' + fetchedResult[0].tehsil + ' ' +
-					fetchedResult[0].district + ' ' + 'Punjab' + ' ' + 'Pakistan';
-				  const Land_id = fetchedResult[0].land_id;
+					let query = db.query(sql, async (err, result) => {
+						if (err) {
+							console.log("Data not found in land_record table");
+							throw new Error("Failed to fetch data from the land_record table");
+						}
 
-				  if (all_requests[0].status == 0) {
-					let data = [];
-					db.query(sql2, async (err, result2) => {
-					  if (err) {
-						console.log("Data not found in user table");
-						throw new Error("Failed to fetch data from the user table");
-					  }
+						const fetchedResult = result;
+						const Address = fetchedResult[0].khatuni + ' ' + fetchedResult[0].mauza + ' ' + fetchedResult[0].tehsil + ' ' +
+							fetchedResult[0].district + ' ' + 'Punjab' + ' ' + 'Pakistan';
+						const Land_id = fetchedResult[0].land_id;
 
-					  const buyer_cnic = result2[0].username;
-					  data.push(buyer_cnic); // Add seller name to the data array
-					  data.push(Land_id);
-					  data.push(Address);
+						if (all_requests[0].status == 0) {
+							let data = [];
+							db.query(sql2, async (err, result2) => {
+								if (err) {
+									console.log("Data not found in user table");
+									throw new Error("Failed to fetch data from the user table");
+								}
 
-					  // eslint-disable-next-line no-use-before-define
-					  await requested_data(data);
+								const buyer_cnic = result2[0].username;
+								data.push(buyer_cnic); // Add seller name to the data array
+								data.push(Land_id);
+								data.push(Address);
+
+								// eslint-disable-next-line no-use-before-define
+								await requested_data(data);
+							});
+						} else {
+							res.render('received_lands', {
+								values: [],
+							});
+						}
 					});
-				  } else {
-					res.render('received_lands', {
-					  values: [],
-					});
-				  }
 				});
-			  });
 			} catch (error) {
-			  console.log("Error occurred:", error.message);
-			  res.render('received_lands', {
-				values: [],
-			  });
+				console.log("Error occurred:", error.message);
+				res.render('received_lands', {
+					values: [],
+				});
 			}
-		  }
+		}
 
-		  async function requested_data(data) {
+		async function requested_data(data) {
 			res.render('received_lands', {
-			  values: data,
+				values: data,
 			});
-		  }
+		}
 
 	}
 	main();
