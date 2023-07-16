@@ -2061,13 +2061,13 @@ router.post('/login_api', function (req, res) {
 	console.log('Flutter Login Request Received Successfully');
 	let errors = [];
 	if (!req.body.cnic) {
-	  errors.push('User CNIC must be provided');
+		errors.push('User CNIC must be provided');
 	}
 	if (!req.body.pw) {
-	  errors.push('Password must be provided');
+		errors.push('Password must be provided');
 	}
 	if (errors.length > 0) {
-	  return res.status(400).json({ errors: errors });
+		return res.status(400).json({ errors: errors });
 	}
 
 	let session;
@@ -2091,259 +2091,259 @@ router.post('/login_api', function (req, res) {
 	const UserPassword = req.body.pw;
 
 	function prettyJSONString(inputString) {
-	  return JSON.stringify(JSON.parse(inputString), null, 2);
+		return JSON.stringify(JSON.parse(inputString), null, 2);
 	}
 
 	async function main() {
-	  try {
-		const ccp = buildCCPOrg1();
-		const caClient = buildCAClient(FabricCAServices, ccp, 'ca.org1.example.com');
-		const wallet = await buildWallet(Wallets, walletPath);
-		await enrollAdmin(caClient, wallet, mspOrg1);
+		try {
+			const ccp = buildCCPOrg1();
+			const caClient = buildCAClient(FabricCAServices, ccp, 'ca.org1.example.com');
+			const wallet = await buildWallet(Wallets, walletPath);
+			await enrollAdmin(caClient, wallet, mspOrg1);
 
-		const gateway = new Gateway();
-		const db = mysql.createConnection({
-		  host: 'localhost',
-		  user: 'root',
-		  password: '',
-		  database: 'test',
-		});
-		db.connect((err) => {
-		  if (err) {
-			console.log(err);
-			return res.status(500).json({ error: 'Failed to connect to the database' });
-		  }
-		  console.log('Connection done');
-		});
-
-		db.connect(async function (err) {
-		  let sql = `SELECT * FROM user WHERE user_cnic=${UserCnic}`;
-		  let query = db.query(sql, async (err, result) => {
-			if (err) {
-			  console.log('Data Not Found');
-			  return res.status(400).json({ error: 'Data Not Found' });
-			}
-			const fetchedResult = result;
-			const org1UserId = fetchedResult[0].username;
-			const private_key = fetchedResult[0].private_key;
-
-			if (fetchedResult[0].password != UserPassword) {
-			  return res.status(400).json({ error: 'Invalid password' });
-			}
-
-			if (org1UserId === 'Patwari') {
-			  try {
-				const userIdentity = await wallet.get(org1UserId);
-				if (!userIdentity) {
-				  console.log(`An identity for the user ${org1UserId} does not exist in the wallet`);
-				  return res.status(400).json({ error: `An identity for the user ${org1UserId} does not exist in the wallet` });
+			const gateway = new Gateway();
+			const db = mysql.createConnection({
+				host: 'localhost',
+				user: 'root',
+				password: '',
+				database: 'test',
+			});
+			db.connect((err) => {
+				if (err) {
+					console.log(err);
+					return res.status(500).json({ error: 'Failed to connect to the database' });
 				}
-
-				const pk1 = userIdentity.credentials.privateKey.substr(27, 66);
-				const pk2 = userIdentity.credentials.privateKey.substr(95, 64);
-				const pk3 = userIdentity.credentials.privateKey.substr(161, 56);
-				const privateKey = pk1.trim() + pk2.trim() + pk3.trim();
-
-				if (private_key !== privateKey) {
-				  return res.status(400).json({ error: 'Invalid password' });
-				}
-
-				await gateway.connect(ccp, {
-				  wallet,
-				  identity: org1UserId,
-				  discovery: { enabled: true, asLocalhost: true },
-				});
-
-				const network = await gateway.getNetwork(channelName);
-				const contract = network.getContract(chaincodeName);
-
-				let assetsExist = await contract.evaluateTransaction('AssetExists', 'asset1');
-				if (assetsExist === 'false') {
-				  await contract.submitTransaction('InitLedger');
-				  console.log('*** Result: committed');
-				}
-
-				console.log('\n--> Evaluate Transaction: GetAllAssets, function returns all the current assets on the ledger');
-				let result = await contract.evaluateTransaction('GetAllAssets');
-				console.log(`*** Result: ${prettyJSONString(result.toString())}`);
-
-				let data = result.toString();
-				let data2 = [];
-				let label = [];
-				let values = [];
-
-				for (var i = 0; i < data.length; i++) {
-				  if (data[i] != '{' && data[i] != '}' && data[i] != '{' && data[i] != '"' && data[i] != '[' && data[i] != ']') {
-					data2.push(data[i]);
-				  }
-				}
-
-				let string;
-				let j;
-
-				for (var i = 0; i < data2.length; i++) {
-				  string = '';
-				  if (i == 0 || data2[i] == ',') {
-					if (data2[i + 1] == 'R' && data2[i + 2] == 'e' && data2[i + 3] == 'c' && data2[i + 4] == 'o' && data2[i + 5] == 'r' && data2[i + 6] == 'd') {
-					  i += 7;
-					}
-					if (i == 0) {
-					  j = i;
-					} else {
-					  j = i + 1;
-					}
-					while (data2[j] != ':') {
-					  string += data2[j];
-					  j++;
-					}
-					label.push(string);
-					i = --j;
-				  }
-				}
-
-				for (var i = 0; i < data2.length; i++) {
-				  string = '';
-				  if (data2[i] == ':') {
-					j = i + 1;
-					while (data2[j] != ',') {
-					  if (j == data2.length - 1) {
-						string += data2[j];
-						break;
-					  }
-					  string += data2[j];
-					  j++;
-					}
-					if (string != '') {
-					  values.push(string);
-					}
-					i = --j;
-				  }
-				}
-
-				const responseData = {
-				  label: label,
-				  values: values,
-				  username: org1UserId
-				};
-
-				return res.status(200).json(responseData);
-			  } finally {
-				gateway.disconnect();
-			  }
-			} else {
-			  await validation(org1UserId, private_key);
-			}
-		  });
-		});
-
-		async function validation(org1UserId, private_key) {
-		  try {
-			const userIdentity = await wallet.get(org1UserId);
-			if (!userIdentity) {
-			  console.log(`An identity for the user ${org1UserId} does not exist in the wallet`);
-			  return res.status(400).json({ error: `An identity for the user ${org1UserId} does not exist in the wallet` });
-			}
-
-			const pk1 = userIdentity.credentials.privateKey.substr(27, 66);
-			const pk2 = userIdentity.credentials.privateKey.substr(95, 64);
-			const pk3 = userIdentity.credentials.privateKey.substr(161, 56);
-			const privateKey = pk1.trim() + pk2.trim() + pk3.trim();
-
-			if (private_key !== privateKey) {
-			  return res.status(400).json({ error: 'Invalid password' });
-			}
-
-			await gateway.connect(ccp, {
-			  wallet,
-			  identity: org1UserId,
-			  discovery: { enabled: true, asLocalhost: true },
+				console.log('Connection done');
 			});
 
-			const network = await gateway.getNetwork(channelName);
-			const contract = network.getContract(chaincodeName);
+			db.connect(async function (err) {
+				let sql = `SELECT * FROM user WHERE user_cnic=${UserCnic}`;
+				let query = db.query(sql, async (err, result) => {
+					if (err) {
+						console.log('Data Not Found');
+						return res.status(400).json({ error: 'Data Not Found' });
+					}
+					const fetchedResult = result;
+					const org1UserId = fetchedResult[0].username;
+					const private_key = fetchedResult[0].private_key;
 
-			let assetsExist = await contract.evaluateTransaction('AssetExists', 'asset1');
-			if (assetsExist === 'false') {
-			  await contract.submitTransaction('InitLedger');
-			  console.log('*** Result: committed');
+					if (fetchedResult[0].password != UserPassword) {
+						return res.status(400).json({ error: 'Invalid password' });
+					}
+
+					if (org1UserId === 'Patwari') {
+						try {
+							const userIdentity = await wallet.get(org1UserId);
+							if (!userIdentity) {
+								console.log(`An identity for the user ${org1UserId} does not exist in the wallet`);
+								return res.status(400).json({ error: `An identity for the user ${org1UserId} does not exist in the wallet` });
+							}
+
+							const pk1 = userIdentity.credentials.privateKey.substr(27, 66);
+							const pk2 = userIdentity.credentials.privateKey.substr(95, 64);
+							const pk3 = userIdentity.credentials.privateKey.substr(161, 56);
+							const privateKey = pk1.trim() + pk2.trim() + pk3.trim();
+
+							if (private_key !== privateKey) {
+								return res.status(400).json({ error: 'Invalid password' });
+							}
+
+							await gateway.connect(ccp, {
+								wallet,
+								identity: org1UserId,
+								discovery: { enabled: true, asLocalhost: true },
+							});
+
+							const network = await gateway.getNetwork(channelName);
+							const contract = network.getContract(chaincodeName);
+
+							let assetsExist = await contract.evaluateTransaction('AssetExists', 'asset1');
+							if (assetsExist === 'false') {
+								await contract.submitTransaction('InitLedger');
+								console.log('*** Result: committed');
+							}
+
+							console.log('\n--> Evaluate Transaction: GetAllAssets, function returns all the current assets on the ledger');
+							let result = await contract.evaluateTransaction('GetAllAssets');
+							console.log(`*** Result: ${prettyJSONString(result.toString())}`);
+
+							let data = result.toString();
+							let data2 = [];
+							let label = [];
+							let values = [];
+
+							for (var i = 0; i < data.length; i++) {
+								if (data[i] != '{' && data[i] != '}' && data[i] != '{' && data[i] != '"' && data[i] != '[' && data[i] != ']') {
+									data2.push(data[i]);
+								}
+							}
+
+							let string;
+							let j;
+
+							for (var i = 0; i < data2.length; i++) {
+								string = '';
+								if (i == 0 || data2[i] == ',') {
+									if (data2[i + 1] == 'R' && data2[i + 2] == 'e' && data2[i + 3] == 'c' && data2[i + 4] == 'o' && data2[i + 5] == 'r' && data2[i + 6] == 'd') {
+										i += 7;
+									}
+									if (i == 0) {
+										j = i;
+									} else {
+										j = i + 1;
+									}
+									while (data2[j] != ':') {
+										string += data2[j];
+										j++;
+									}
+									label.push(string);
+									i = --j;
+								}
+							}
+
+							for (var i = 0; i < data2.length; i++) {
+								string = '';
+								if (data2[i] == ':') {
+									j = i + 1;
+									while (data2[j] != ',') {
+										if (j == data2.length - 1) {
+											string += data2[j];
+											break;
+										}
+										string += data2[j];
+										j++;
+									}
+									if (string != '') {
+										values.push(string);
+									}
+									i = --j;
+								}
+							}
+
+							const responseData = {
+								label: label,
+								values: values,
+								username: org1UserId
+							};
+
+							return res.status(200).json(responseData);
+						} finally {
+							gateway.disconnect();
+						}
+					} else {
+						await validation(org1UserId, private_key);
+					}
+				});
+			});
+
+			async function validation(org1UserId, private_key) {
+				try {
+					const userIdentity = await wallet.get(org1UserId);
+					if (!userIdentity) {
+						console.log(`An identity for the user ${org1UserId} does not exist in the wallet`);
+						return res.status(400).json({ error: `An identity for the user ${org1UserId} does not exist in the wallet` });
+					}
+
+					const pk1 = userIdentity.credentials.privateKey.substr(27, 66);
+					const pk2 = userIdentity.credentials.privateKey.substr(95, 64);
+					const pk3 = userIdentity.credentials.privateKey.substr(161, 56);
+					const privateKey = pk1.trim() + pk2.trim() + pk3.trim();
+
+					if (private_key !== privateKey) {
+						return res.status(400).json({ error: 'Invalid password' });
+					}
+
+					await gateway.connect(ccp, {
+						wallet,
+						identity: org1UserId,
+						discovery: { enabled: true, asLocalhost: true },
+					});
+
+					const network = await gateway.getNetwork(channelName);
+					const contract = network.getContract(chaincodeName);
+
+					let assetsExist = await contract.evaluateTransaction('AssetExists', 'asset1');
+					if (assetsExist === 'false') {
+						await contract.submitTransaction('InitLedger');
+						console.log('*** Result: committed');
+					}
+
+					console.log('\n--> Evaluate Transaction: GetAllAssets, function returns all the current assets on the ledger');
+					let result = await contract.evaluateTransaction('GetAllAssets');
+					console.log(`*** Result: ${prettyJSONString(result.toString())}`);
+
+					let data = result.toString();
+					let data2 = [];
+					let label = [];
+					let values = [];
+
+					for (var i = 0; i < data.length; i++) {
+						if (data[i] != '{' && data[i] != '}' && data[i] != '{' && data[i] != '"' && data[i] != '[' && data[i] != ']') {
+							data2.push(data[i]);
+						}
+					}
+
+					let string;
+					let j;
+
+					for (var i = 0; i < data2.length; i++) {
+						string = '';
+						if (i == 0 || data2[i] == ',') {
+							if (data2[i + 1] == 'R' && data2[i + 2] == 'e' && data2[i + 3] == 'c' && data2[i + 4] == 'o' && data2[i + 5] == 'r' && data2[i + 6] == 'd') {
+								i += 7;
+							}
+							if (i == 0) {
+								j = i;
+							} else {
+								j = i + 1;
+							}
+							while (data2[j] != ':') {
+								string += data2[j];
+								j++;
+							}
+							label.push(string);
+							i = --j;
+						}
+					}
+
+					for (var i = 0; i < data2.length; i++) {
+						string = '';
+						if (data2[i] == ':') {
+							j = i + 1;
+							while (data2[j] != ',') {
+								if (j == data2.length - 1) {
+									string += data2[j];
+									break;
+								}
+								string += data2[j];
+								j++;
+							}
+							if (string != '') {
+								values.push(string);
+							}
+							i = --j;
+						}
+					}
+
+					const responseData = {
+						label: label,
+						values: values,
+						username: org1UserId
+					};
+
+					return res.status(200).json(responseData);
+				} finally {
+					gateway.disconnect();
+				}
 			}
-
-			console.log('\n--> Evaluate Transaction: GetAllAssets, function returns all the current assets on the ledger');
-			let result = await contract.evaluateTransaction('GetAllAssets');
-			console.log(`*** Result: ${prettyJSONString(result.toString())}`);
-
-			let data = result.toString();
-			let data2 = [];
-			let label = [];
-			let values = [];
-
-			for (var i = 0; i < data.length; i++) {
-			  if (data[i] != '{' && data[i] != '}' && data[i] != '{' && data[i] != '"' && data[i] != '[' && data[i] != ']') {
-				data2.push(data[i]);
-			  }
-			}
-
-			let string;
-			let j;
-
-			for (var i = 0; i < data2.length; i++) {
-			  string = '';
-			  if (i == 0 || data2[i] == ',') {
-				if (data2[i + 1] == 'R' && data2[i + 2] == 'e' && data2[i + 3] == 'c' && data2[i + 4] == 'o' && data2[i + 5] == 'r' && data2[i + 6] == 'd') {
-				  i += 7;
-				}
-				if (i == 0) {
-				  j = i;
-				} else {
-				  j = i + 1;
-				}
-				while (data2[j] != ':') {
-				  string += data2[j];
-				  j++;
-				}
-				label.push(string);
-				i = --j;
-			  }
-			}
-
-			for (var i = 0; i < data2.length; i++) {
-			  string = '';
-			  if (data2[i] == ':') {
-				j = i + 1;
-				while (data2[j] != ',') {
-				  if (j == data2.length - 1) {
-					string += data2[j];
-					break;
-				  }
-				  string += data2[j];
-				  j++;
-				}
-				if (string != '') {
-				  values.push(string);
-				}
-				i = --j;
-			  }
-			}
-
-			const responseData = {
-			  label: label,
-			  values: values,
-			  username: org1UserId
-			};
-
-			return res.status(200).json(responseData);
-		  } finally {
-			gateway.disconnect();
-		  }
+		} catch (error) {
+			console.error(`******** FAILED to run the application: ${error}`);
+			return res.status(400).json({ error: 'Failed to run the application' });
 		}
-	  } catch (error) {
-		console.error(`******** FAILED to run the application: ${error}`);
-		return res.status(400).json({ error: 'Failed to run the application' });
-	  }
 	}
 
 	main();
-  });
+});
 
 
 
@@ -2674,6 +2674,87 @@ router.post('/land_request', function (req, res) {
 		// main();
 	}
 });
+
+
+router.post('/land_request_api', function (req, res) {
+	console.log('Flutter Land Request Received Successfully');
+	let errors = [];
+	if (!req.body.id) {
+		console.log('Land ID must be provided');
+	} else {
+		'use strict';
+
+		console.log('Land ID received successfully', req.body.id);
+
+		const mysql = require('mysql');
+		const LandId = req.body.id;
+
+		const UserCnic = req.session.userid;
+		console.log(UserCnic);
+
+		const db = mysql.createConnection({
+			host: 'localhost',
+			user: 'root',
+			password: '',
+			database: 'test',
+		});
+
+		// Connect to the database
+		db.connect((err) => {
+			if (err) {
+				console.log(err);
+			}
+			console.log('Connection done 1');
+		});
+
+		db.connect(function (err) {
+			let sql = `SELECT * FROM land_record WHERE land_id = '${LandId}'`;
+			let query = db.query(sql, async (err, result) => {
+				if (err) {
+					console.log("Data Not Found");
+				}
+				const fetchedResult = result;
+				await main(fetchedResult);
+			});
+		});
+
+		async function main(fetchedResult) {
+			try {
+				let post = {
+					land_id: LandId,
+					seller_cnic: fetchedResult[0].user_cnic,
+					buyer_cnic: UserCnic, // Update the buyer_cnic with the value from the session
+					status: 0
+				};
+
+				let checkQuery = "SELECT * FROM buyer_requests WHERE land_id = ?";
+				let checkValues = [LandId];
+				let query = db.query(checkQuery, checkValues, (err, result) => {
+					if (err) {
+						console.log(err);
+					}
+					if (result.length === 0) {
+						let insertQuery = "INSERT INTO buyer_requests SET ?";
+						let insertValues = post;
+						db.query(insertQuery, insertValues, (err, result) => {
+							if (err) {
+								console.log(err);
+							}
+							console.log("Successfully buyer request is added in the database");
+						});
+					} else {
+						console.log(" ");
+					}
+				});
+
+				res.status(200).json({ success: true });
+			} catch (error) {
+				console.error(`******** FAILED to run the application: ${error}`);
+			}
+		}
+	}
+});
+
 
 
 router.post('/cancel_request', function (req, res) {
