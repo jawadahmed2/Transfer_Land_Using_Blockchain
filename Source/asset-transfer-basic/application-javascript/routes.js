@@ -2223,7 +2223,8 @@ router.post('/login_api', function (req, res) {
 							const responseData = {
 								label: label,
 								values: values,
-								username: org1UserId
+								username: org1UserId,
+								cnic: UserCnic
 							};
 
 							return res.status(200).json(responseData);
@@ -2328,7 +2329,8 @@ router.post('/login_api', function (req, res) {
 					const responseData = {
 						label: label,
 						values: values,
-						username: org1UserId
+						username: org1UserId,
+						cnic: UserCnic
 					};
 
 					return res.status(200).json(responseData);
@@ -2478,6 +2480,89 @@ router.get('/requested_lands', function (req, res) {
 	}
 	main();
 });
+
+
+// Make API for flutter for requested land page
+router.get('/requested_lands_api', function (req, res) {
+	const mysql = require('mysql');
+	const UserCnic = req.body.cnic;
+
+	const db = mysql.createConnection({
+	  host: 'localhost',
+	  user: 'root',
+	  password: '',
+	  database: 'test',
+	});
+
+	// connect to database
+	db.connect((err) => {
+	  if (err) {
+		console.log(err);
+	  }
+	  console.log('Connection done 2');
+	});
+
+	async function main() {
+	  db.connect(function (err) {
+		let sql = `SELECT * FROM buyer_requests WHERE buyer_cnic = ${UserCnic}`;
+		let query = db.query(sql, async (err, result) => {
+		  if (err) {
+			console.log("Data Not Found");
+		  }
+
+		  const all_requests = result;
+		  const seller_cnic = all_requests[0].seller_cnic;
+
+		  let sql2 = `SELECT * FROM land_record WHERE land_id = '${all_requests[0].land_id}'`;
+		  let sql3 = `SELECT * FROM user WHERE user_cnic = ${seller_cnic}`;
+
+		  let query2 = db.query(sql2, async (err, result2) => {
+			if (err) {
+			  console.log("Data Not Found");
+			}
+
+			const fetchedResult = result2;
+			const Address = fetchedResult[0].khatuni + ' ' + fetchedResult[0].mauza + ' ' + fetchedResult[0].tehsil + ' ' +
+			  fetchedResult[0].district + ' ' + 'Punjab' + ' ' + 'Pakistan';
+			const Land_id = fetchedResult[0].land_id;
+			let Status;
+			if (all_requests[0].status == 0) {
+			  Status = 'Pending';
+			} else if (all_requests[0].status == 1) {
+			  Status = 'Not Approved';
+			} else {
+			  Status = 'Approved';
+			}
+
+			let data = [];
+			let query3 = db.query(sql3, async (err, result3) => {
+			  if (err) {
+				console.log("Data Not Found");
+			  }
+
+			  const seller_cnic = result3[0].username;
+			  data.push(seller_cnic);
+			  data.push(Land_id);
+			  data.push(Address);
+			  data.push(Status);
+
+			  if (data && data.length > 0) {
+				// Data is not empty
+				res.json(data);
+			  } else {
+				// Data is empty
+				res.json([]);
+			  }
+			});
+		  });
+		});
+	  });
+	}
+
+	main();
+  });
+
+
 
 router.get('/received_lands', function (req, res) {
 	const mysql = require('mysql');
@@ -2689,8 +2774,7 @@ router.post('/land_request_api', function (req, res) {
 		const mysql = require('mysql');
 		const LandId = req.body.id;
 
-		const UserCnic = req.session.userid;
-		console.log(UserCnic);
+		const UserCnic = req.body.cnic;
 
 		const db = mysql.createConnection({
 			host: 'localhost',
@@ -2838,6 +2922,13 @@ router.get('/logout', function (req, res) {
 	session.userid = undefined;
 	res.redirect('/');
 });
+
+router.get('/logout_api', function (req, res) {
+	req.session.userid = undefined;
+	console.log('Logout Successfully');
+	res.status(200).send('Logout successful');
+  });
+
 
 // to use this router we export these routers from this file and then import that into app.js
 // using --- const routes=require('./routes');  -- see line 110 in app.js file

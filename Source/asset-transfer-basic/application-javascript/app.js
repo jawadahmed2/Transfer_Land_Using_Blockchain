@@ -76,25 +76,17 @@ const sessions = require('express-session');
 // creating 24 hours from milliseconds. One hour = 3600000 i.e. 1000 * 60 * 60
 const oneDay = 1000 * 60 * 60 * 24;
 
-app.use(sessions({
-    // secret - a random unique string key used to authenticate a session. It is stored in an environment
-    // variable and can’t be exposed to the public. The key is usually long and randomly generated in a
-    // production environment.
-    secret: "eriomnvbhfsdweer095lkfhrgfgrfrty84fwir767",
-    // saveUninitialized - this allows any uninitialized session to be sent to the store. When a session is
-    // created but not modified, it is referred to as uninitialized.
-    saveUninitialized:true,
-    // cookie: { maxAge: oneDay } - this sets the cookie expiry time. The browser will delete the cookie
-    // after the set duration elapses. The cookie will not be attached to any of the requests in the future.
-    // In this case, we’ve set the maxAge to a single day as computed arithmetically one line 66.
+
+app.use(cookieParser());
+
+app.use(
+  sessions({
+    secret: 'eriomnvbhfsdweer095lkfhrgfgrfrty84fwir767', // Replace with your own secret key
+    saveUninitialized: true,
+    resave: false,
     cookie: { maxAge: oneDay },
-    // resave - takes a Boolean value. It enables the session to be stored back to the session store,
-    // even if the session was never modified during the request. This can result in a race situation
-    // in case a client makes two parallel requests to the server. Thus modification made on the session
-    // of the first request may be overwritten when the second request ends. The default value is true.
-    //However, this may change at some point. Using false is a better alternative.
-    resave: false
-}));
+  })
+);
 
 // Cookie parser middleware is used to parse cookie header to store data on the browser whenever a session
 // is established on the server-side.
