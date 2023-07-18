@@ -740,6 +740,7 @@ router.post('/update_owner', function (req, res) {
 
 								db.connect(function (err) {
 									const LandId = fetchedResult[0].land_id; // Assuming you have the LandId value
+									const BuyerCnic = fetchedResult[0].buyer_cnic;
 									let updateQuery = "UPDATE buyer_requests SET status = ? WHERE land_id = ? AND seller_cnic = ?";
 									let updateValues = [2, LandId, fetchedResult[0].seller_cnic]; // Update status value to 1 (or your desired value)
 
@@ -758,10 +759,20 @@ router.post('/update_owner', function (req, res) {
 												console.log(err);
 											}
 											console.log("Successfully updated the status in the land_inspector table");
+											// Send a success response
+											res.status(200).json({ response: 'success' });
 										});
 
-										// Send a success response
-										res.status(200).json({ response: 'success' });
+										// Update user_cnic in land_record table
+										let updateLandRecordQuery = "UPDATE land_record SET user_cnic = ? WHERE land_id = ?";
+										let updateLandRecordValues = [BuyerCnic, LandId];
+										db.query(updateLandRecordQuery, updateLandRecordValues, (err, result) => {
+											if (err) {
+												console.log(err);
+											}
+											console.log("Successfully updated the user_cnic in the land_record table");
+										});
+
 									});
 								});
 							} catch (error) {
@@ -2209,7 +2220,7 @@ router.get('/received_lands', function (req, res) {
 								let data = [buyer_cnic, Land_id, Address, seller_cnic, all_requests[0].status];
 								return requestedData(data);
 							} else {
-								return res.render('received_lands', { values: [], username:UserCnic });
+								return res.render('received_lands', { values: [], username: UserCnic });
 							}
 						});
 
@@ -2219,7 +2230,7 @@ router.get('/received_lands', function (req, res) {
 				db.getConnection(function (err, connection) {
 					if (err) {
 						console.log('Database connection error:', err);
-						return res.render('received_lands', { values: [], username:UserCnic });
+						return res.render('received_lands', { values: [], username: UserCnic });
 					}
 
 					let sql = `SELECT * FROM buyer_requests WHERE seller_cnic = ${UserCnic}`;
@@ -2228,14 +2239,14 @@ router.get('/received_lands', function (req, res) {
 
 						if (err) {
 							console.log("Data Not Found");
-							return res.render('received_lands', { values: [], username:UserCnic });
+							return res.render('received_lands', { values: [], username: UserCnic });
 						}
 
 						const all_requests = result;
 
 						if (!Array.isArray(all_requests) || all_requests.length === 0) {
 							console.log("Invalid or empty 'all_requests' parameter");
-							return res.render('received_lands', { values: [], username:UserCnic });
+							return res.render('received_lands', { values: [], username: UserCnic });
 						}
 
 						const buyer_cnic = all_requests[0].buyer_cnic;
@@ -2245,7 +2256,7 @@ router.get('/received_lands', function (req, res) {
 						connection.query(sql2, async (err, result2) => {
 							if (err) {
 								console.log("Data not found in user table");
-								return res.render('received_lands', { values: [], username:UserCnic });
+								return res.render('received_lands', { values: [], username: UserCnic });
 							}
 
 							const buyer_cnic = result2[0].buyer_username;
@@ -2259,7 +2270,7 @@ router.get('/received_lands', function (req, res) {
 								let data = [buyer_cnic, Land_id, Address, seller_cnic, all_requests[0].status];
 								return requestedData(data);
 							} else {
-								return res.render('received_lands', { values: [] , username:UserCnic});
+								return res.render('received_lands', { values: [], username: UserCnic });
 							}
 						});
 					});
@@ -2267,7 +2278,7 @@ router.get('/received_lands', function (req, res) {
 			}
 		} catch (error) {
 			console.log("Error occurred:", error.message);
-			res.render('received_lands', { values: [] , username:UserCnic});
+			res.render('received_lands', { values: [], username: UserCnic });
 		}
 	}
 
@@ -2286,7 +2297,7 @@ router.get('/received_lands', function (req, res) {
 	}
 
 	function requestedData(data) {
-		res.render('received_lands', { values: data , username:UserCnic});
+		res.render('received_lands', { values: data, username: UserCnic });
 	}
 
 	main();
