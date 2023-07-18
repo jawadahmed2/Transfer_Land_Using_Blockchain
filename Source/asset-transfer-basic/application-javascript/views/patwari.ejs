@@ -21,6 +21,11 @@
         .requestBtn:hover {
             background-color: #45a049;
         }
+
+        .disabled-button {
+            pointer-events: none;
+            opacity: 0.5;
+        }
     </style>
 
 </head>
@@ -29,7 +34,7 @@
 <body>
     <div style="text-align: left;">
         <h1 style="color: blue; font-weight: bold;" class="title">
-            Welcome <%= username %>
+            Welcome Land Inspector
         </h1>
     </div>
 
@@ -78,7 +83,7 @@
                                             <%= values[5 + k] %>
                                         </td>
                                         <td>
-                                            <button class="requestBtn">Verified</button>
+                                            <button disabled class="requestBtn">Verified</button>
                                             <!-- <%= values[6 + k] %> -->
                                         </td>
                                         <!-- <td>

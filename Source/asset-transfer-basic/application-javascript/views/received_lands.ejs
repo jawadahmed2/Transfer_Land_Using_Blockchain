@@ -22,6 +22,20 @@
             background-color: #45a049;
         }
 
+        .approvetBtn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .approvetBtn:hover {
+            background-color: #45a049;
+        }
+
         .cancelBtn {
             background-color: #e44833;
             color: white;
@@ -51,10 +65,11 @@
                 <thead>
                     <tr>
                         <th>LandID</th>
+                        <th>Seller Name</th>
                         <th>Buyer Name</th>
                         <th>Address</th>
                         <br>
-                        <th>Approve</th>
+                        <th>Request</th>
                         <br>
                         <th>Decline</th>
                     </tr>
@@ -63,10 +78,13 @@
                 <tbody>
                     <% if (values && values.length> 0) { %>
                         <% k=0 %>
-                            <% for (var i=0; i < values.length / 4; i++) { %>
+                            <% for (var i=0; i < values.length / 5; i++) { %>
                                 <tr>
                                     <td>
                                         <%= values[1 + k] %>
+                                    </td>
+                                    <td>
+                                        <%= values[3 + k] %>
                                     </td>
                                     <td>
                                         <%= values[0 + k] %>
@@ -75,15 +93,18 @@
                                         <%= values[2 + k] %>
                                     </td>
                                     <td>
-                                        <button class="requestBtn">Click to Transfer</button>
-                                        <!-- <%= values[6 + k] %> -->
+                                        <% if (values[4 + k]==3) { %>
+                                            <button class="approvetBtn">Approve</button>
+                                            <% } else { %>
+                                                <button class="requestBtn">Patwari Transfer Request</button>
+                                                <% } %>
                                     </td>
                                     <td>
                                         <button class="cancelBtn">Click to Decline</button>
                                         <!-- <%= values[6 + k] %> -->
                                     </td>
                                 </tr>
-                                <% k=k + 4 %>
+                                <% k=k + 5 %>
                                     <% } %>
                                         <% } else { %>
                                             <tr>
@@ -91,33 +112,64 @@
                                             </tr>
                                             <% } %>
                 </tbody>
+
             </table>
         </div>
     </center>
     <br><br>
     <script>
         $(document).ready(function () {
-            // Handle button click event
-            $('.requestBtn').click(function () {
+            //Handle approve button click event
+            $('.approvetBtn').click(function () {
                 var id = $(this).closest('tr').find('td:eq(0)').text().trim(); // Remove spaces from the ID value
-                var username = $(this).closest('tr').find('td:eq(1)').text().trim(); // Remove spaces from the ID value
-                console.log(id);
+                var buyer_name = $(this).closest('tr').find('td:eq(2)').text().trim(); // Remove spaces from the buyer name value
+                var seller_name = $(this).closest('tr').find('td:eq(1)').text().trim(); // Remove spaces from the seller name value
+                console.log(id,buyer_name,seller_name);
                 var button = $(this); // Store a reference to the button element
 
                 // Make AJAX request to post the ID value to the Node.js Express function
                 $.ajax({
                     url: '/update_owner',
                     method: 'POST',
-                    data: { id: id, newowner: username },
+                    data: { id: id, newowner: buyer_name, seller_name: seller_name },
                     success: function (response) {
                         console.log('ID value submitted successfully');
-                        if (response === 'success') {
+                        if (response.response === 'success') {
                             window.location.href = '/display';
                         } else {
                             console.log('Unexpected response:', response);
                         }
                         // window.location.href = '/display';
 
+                    },
+                    error: function (xhr, status, error) {
+                        console.log('An error occurred: ', error);
+                    }
+                });
+            });
+
+            // Handle request button click event
+            $('.requestBtn').click(function () {
+                var requestButton = $(this); // Store a reference to the request button element
+                var cancelButton = $(this).closest('tr').find('.cancelBtn'); // Find the corresponding cancel button
+
+                var id = $(this).closest('tr').find('td:eq(0)').text().trim(); // Remove spaces from the ID value
+
+                // Make AJAX request to post the ID value to the Node.js Express function
+                $.ajax({
+                    url: '/seller_request_patwari',
+                    method: 'POST',
+                    data: { id: id },
+                    success: function (response) {
+                        console.log('ID value submitted successfully');
+                        if (response.success) {
+                            console.log('ID value submitted successfully');
+                            requestButton.text('Successfully Requested'); // Update the request button text
+                            requestButton.prop('disabled', true); // Disable the request button
+                            cancelButton.hide(); // Hide the cancel button
+                        } else {
+                            console.log('Unexpected response:', response);
+                        }
                     },
                     error: function (xhr, status, error) {
                         console.log('An error occurred: ', error);

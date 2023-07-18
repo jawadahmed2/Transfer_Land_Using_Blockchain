@@ -21,11 +21,14 @@
 // call the variable express, you can do var foo = require('express'); and use foo instead, but convention
 // is that you'd use the module's name.
 const express = require('express');
+const debug = require('debug');
+
 
 // To set up our actual server we're going to create an app variable which is just by calling the
 // express() function. By calling express() as a function we create an application which allows us to
 // set up our entire server.
 const app = express();
+
 
 const cors = require("cors");
 app.use(cors());
@@ -38,14 +41,15 @@ app.use(cors());
 // With the following statement your application can use layouts using layout.ejs file located in the views folder.
 const layout = require('express-layout');
 
+
 // We used a middleware express.static function. This express.static function takes the name of the folder
 // where all of our static files are. In our case, all such files (css, fonts, images etc.) are placed in
 // public folder. So we passed the folder name 'public' to express.static function and this is going to serve
 // all the files from our public folder.
 
-const middleware=[
-    layout(),
-    express.static('public')
+const middleware = [
+  layout(),
+  express.static('public')
 ];
 app.use(middleware);
 
@@ -88,6 +92,8 @@ app.use(
   })
 );
 
+debug.disable('express');
+
 // Cookie parser middleware is used to parse cookie header to store data on the browser whenever a session
 // is established on the server-side.
 app.use(cookieParser());
@@ -102,7 +108,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // view engine (ejs) is used to render files from the views folder.
 // We are telling our server to use EJS template engine
-app.set('view engine','ejs');
+app.set('view engine', 'ejs');
 
 // We invoke the home page (indexed.html) of the application in the code below using this app.js file.
 // We can call as many file as we need
@@ -118,16 +124,15 @@ const routes = require('./routes');
 // We use it for linking a route to a particular path. Here we pass to this the actual path that we start our
 // things with. So we started all of these with a forward slash to mount all routes that are specified
 // in "routes.js" file.
-app.use('/',routes);
+app.use('/', routes);
 
 // The home page of the application (index.html) is invoked using the render method.
-app.get('/', (req,res) => {
-    res.render('index');
+app.get('/', (req, res) => {
+  res.render('index');
 });
-
 
 // To make our server actually run we use app.listen. We pass in it a port number.
 // This app starts a server and listens on port 3001 for connections.
-app.listen(3001,function(){
-    console.log("Server started on Port 3001");
+app.listen(3001, function () {
+  console.log("Server started on Port 3001");
 });
