@@ -34,7 +34,7 @@
     </div>
 
     <h1 style="color: blue; font-weight: bold;" class="title">
-        All Land Info
+        All Available Lands
     </h1>
 
     <%# Tabular Display%>
@@ -58,37 +58,38 @@
                         <% if (values && values.length> 0) { %>
                             <% let k=0 %>
                                 <% for (let i=0; i < Math.floor(values.length / 7); i++) { %>
-                                    <tr>
-                                        <td>
-                                            <%= values[1 + k] %>
-                                        </td>
-                                        <td>
-                                            <%= values[3 + k] %>
-                                        </td>
-                                        <td>
-                                            <%= values[0 + k] %>
-                                        </td>
-                                        <td>
-                                            <%= values[2 + k] %> Sqft
-                                        </td>
-                                        <td>
-                                            <%= values[4 + k] %> RS
-                                        </td>
-                                        <td>
-                                            <%= values[5 + k] %>
-                                        </td>
-                                        <td>
-                                            <button class="requestBtn">Request To Buy</button>
-                                            <!-- <%= values[6 + k] %> -->
-                                        </td>
-                                        <!-- <td>
-                                <%= values[7 + k] %>
-                              </td> -->
-                                    </tr>
-                                    <% k=k + 7 %>
+                                    <% if (values[3 + k] !==username) { %>
+                                        <!-- Check if the current username is not equal to the username in the loop -->
+                                        <tr>
+                                            <td>
+                                                <%= values[1 + k] %>
+                                            </td>
+                                            <td>
+                                                <%= values[3 + k] %>
+                                            </td>
+                                            <td>
+                                                <%= values[0 + k] %>
+                                            </td>
+                                            <td>
+                                                <%= values[2 + k] %> Sqft
+                                            </td>
+                                            <td>
+                                                <%= values[4 + k] %> RS
+                                            </td>
+                                            <td>
+                                                <%= values[5 + k] %>
+                                            </td>
+                                            <td>
+                                                <button class="requestBtn">Request To Buy</button>
+                                                <!-- <%= values[6 + k] %> -->
+                                            </td>
+                                        </tr>
                                         <% } %>
-                                            <% } %>
+                                            <% k=k + 7 %>
+                                                <% } %>
+                                                    <% } %>
                     </tbody>
+
 
 
                 </table>

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Land Record</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <style>
+        .availableTextBtn {
+          background-color: transparent;
+          color: #4CAF50;
+          padding: 8px 16px;
+          border: none;
+          cursor: pointer;
+          border-radius: 4px;
+          text-align: center;
+          text-decoration: underline;
+        }
+
+        .availableTextBtn:hover {
+          color: #45a049;
+        }
+      </style>
+
+</head>
+
+
+<body>
+    <div style="text-align: left;">
+        <h1 style="color: blue; font-weight: bold;" class="title">
+            Welcome <%= username %>
+        </h1>
+    </div>
+
+    <h1 style="color: blue; font-weight: bold;" class="title">
+       My Registered Lands
+    </h1>
+
+    <%# Tabular Display%>
+        <center>
+            <div style=" width: 100%;">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>LandID</th>
+                            <th>Owner</th>
+                            <th>Address</th>
+                            <th>LandSize</th>
+                            <th>Price</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <!-- <th>Documents</th> -->
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <% if (values && values.length> 0) { %>
+                            <% let k=0 %>
+                                <% for (let i=0; i < Math.floor(values.length / 7); i++) { %>
+                                    <% if (values[3 + k] ===username) { %>
+                                        <!-- Check if the current username is not equal to the username in the loop -->
+                                        <tr>
+                                            <td>
+                                                <%= values[1 + k] %>
+                                            </td>
+                                            <td>
+                                                <%= values[3 + k] %>
+                                            </td>
+                                            <td>
+                                                <%= values[0 + k] %>
+                                            </td>
+                                            <td>
+                                                <%= values[2 + k] %> Sqft
+                                            </td>
+                                            <td>
+                                                <%= values[4 + k] %> RS
+                                            </td>
+                                            <td>
+                                                <%= values[5 + k] %>
+                                            </td>
+                                            <td>
+                                                <a disabled class="availableTextBtn">Available To Sell</a>
+                                                <!-- <%= values[6 + k] %> -->
+                                            </td>
+                                        </tr>
+                                        <% } %>
+                                            <% k=k + 7 %>
+                                                <% } %>
+                                                    <% } %>
+                    </tbody>
+
+
+
+                </table>
+            </div>
+        </center>
+        <br><br>
+
+
+        <script>
+            $(document).ready(function () {
+                // Handle button click event
+                $('.requestBtn').click(function () {
+                    var button = $(this); // Store a reference to the button element
+                    var id = button.closest('tr').find('td:eq(0)').text().trim(); // Remove spaces from the ID value
+                    console.log(id);
+
+                    // Check if the button was already clicked
+                    var isButtonClicked = localStorage.getItem(id);
+                    if (isButtonClicked) {
+                        button.text('Requested'); // Set the button text to "Requested"
+                        button.attr('disabled', true); // Disable the button
+                        return;
+                    }
+
+                    // Make AJAX request to post the ID value to the Node.js Express function
+                    $.ajax({
+                        url: '/land_request',
+                        method: 'POST',
+                        data: { id: id },
+                        success: function (response) {
+                            console.log('ID value submitted successfully');
+                            window.location.href = '/requested_lands';
+
+                            // Check the response from the server
+                            if (response.success) {
+                                button.text('Requested'); // Change button text using the stored reference
+                                button.attr('disabled', true); // Disable the button to prevent further clicks
+                                localStorage.setItem(id, true); // Store the button click state in local storage
+                            } else {
+                                console.log('An error occurred: ', response.error);
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.log('An error occurred: ', error);
+                        }
+                    });
+                });
+            });
+        </script>
+
+
+
+</body>
+
+</html>

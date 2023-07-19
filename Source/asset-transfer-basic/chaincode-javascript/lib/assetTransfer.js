@@ -138,59 +138,7 @@ class AssetTransfer extends Contract {
         return (cid.getAttributeValue("role"));
     }
 
-    // UpdateAsset updates an existing asset in the world state with provided parameters.
-    async UpdateAsset(ctx, id, Address, LandSize, owner, price) { //remove filePath
-        const exists = await this.AssetExists(ctx, id);
-        if (!exists) {
-            throw new Error(`The asset ${id} does not exist`);
-        }
-        var today = new Date();
-        var dd = String(today.getDate()).padStart(2, '0');
-        var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
-        var yyyy = today.getFullYear();
-        today = mm + '/' + dd + '/' + yyyy;
-
-        // overwriting original asset with new asset
-        const updatedAsset = {
-            LandID: id,
-            Address: Address,
-            LandSize: LandSize,
-            Owner: owner,
-            Price: price,
-            docType: 'asset',
-            addedOn: today,
-            // filePath: filepath,
-        };
-        // we insert data in alphabetic order using 'json-stringify-deterministic' and 'sort-keys-recursive'
-        // ctx.stub is used to access APIs that provide a broad range of transaction processing operations
-        // from putState() and getState() to access the ledger, to getTxID() to retrieve the current
-        // transaction ID.
-        // The Buffer.from() method creates a new buffer filled with the specified string, array, or buffer.
-        // var buf = Buffer.from('abc');
-        // stringify() method converts a JavaScript object or value to a JSON string
-        return ctx.stub.putState(id, Buffer.from(stringify(sortKeysRecursive(updatedAsset))));
-    }
-
-    // DeleteAsset deletes a given asset from the world state.
-    // There is a state database that stores keys and their values. This is different from the sequence of
-    // blocks that make up the blockchain. A key and its associated value can be removed from the state
-    // database using the DelState function. However, this does not mean that there is an alteration of blocks
-    // on the blockchain. The removal of a key and value would be stored as a transaction on the blockchain
-    // just as the prior addition and any modifications were stored as transactions on the blockchain.
-    // The history of a key can be retrieved after the key is deleted. There is a GetHistoryForKey() API that
-    // retrieves the history and part of its response is an IsDeleted flag that indicates if the key was deleted.
-    // It would be possible to create a key, delete the key, and then create the key again; the
-    // GetHistoryForKey() API would track such a case.
-    // The state database stores the current state, so the key and its value are deleted from the state database.
-    // The GetHistoryForKey() API reviews the chain history and not the state database to find prior key values.
-    async DeleteAsset(ctx, id) {
-        const exists = await this.AssetExists(ctx, id);
-        if (!exists) {
-            throw new Error(`The asset ${id} does not exist`);
-        }
-        return ctx.stub.deleteState(id);
-    }
-
+ 
     // AssetExists returns true when asset with given ID exists in world state.
     async AssetExists(ctx, id) {
         const assetJSON = await ctx.stub.getState(id);

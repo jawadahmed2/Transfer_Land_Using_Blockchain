@@ -243,6 +243,217 @@ router.get('/display', function (req, res) {
 });
 
 
+// Display ALL my Registered Assets into the blockchain
+router.get('/display_mylands', function (req, res) {
+	// The purpose of "use strict" is to indicate that the code should be executed in "strict mode".
+	// With strict mode, you cannot, for example, use undeclared variables.
+	'use strict';
+
+	// fabric-network package encapsulates the APIs to connect to a Fabric network, submit transactions and
+	// perform queries against the ledger, and listen for or replay events.
+	// fabric-ca-client, to interact with the fabric-ca to manage user certificates.
+	const { Gateway, Wallets } = require('fabric-network');
+	const FabricCAServices = require('fabric-ca-client');
+	// Nodejs provides you with the path module that allows you to interact with file paths easily.
+	// The path module has many useful properties and methods to access and manipulate paths in the file system.
+	const path = require('path');
+	// the second ../ represents asset-transfer-basic folder
+	// the first ../ represents fabric-samples that contains test-application folder
+	// buildCAClient: Create a new CA client for interacting with the CA.
+	const { buildCAClient, registerAndEnrollUser, enrollAdmin } = require('../../test-application/javascript/CAUtil.js');
+	const { buildCCPOrg1, buildWallet } = require('../../test-application/javascript/AppUtil.js');
+
+	const channelName = 'mychannel';
+	const chaincodeName = 'basic';
+	const mspOrg1 = 'Org1MSP';
+	const walletPath = path.join(__dirname, 'wallet');
+	// const org1UserId = req.session.userid;
+
+	const mysql = require('mysql');
+	const UserCnic = req.session.userid;
+
+	const db = mysql.createConnection({
+		host: 'localhost',
+		user: 'root',
+		password: '',
+		database: 'test',
+	});
+	// connect to database
+	db.connect((err) => {
+		if (err) {
+			console.log(err);
+		}
+		console.log('Connection done 3');
+	});
+	db.connect(function (err) {
+		let sql = `SELECT * FROM user WHERE user_cnic= ${UserCnic}`;
+		let query = db.query(sql, async (err, result) => {
+			if (err) {
+				console.log("Data Not Found");
+			}
+			// console.log(result);
+			const fetchedResult = result;
+
+			const org1UserId = fetchedResult[0].username;
+
+			// Call a function or perform actions that rely on the fetched data
+			// eslint-disable-next-line no-use-before-define
+			await main(org1UserId);
+		});
+	});
+
+	console.log(req.session);
+
+	function prettyJSONString(inputString) {
+		return JSON.stringify(JSON.parse(inputString), null, 2);
+	}
+
+	async function main(org1UserId) {
+		try {
+			if (org1UserId === undefined) {
+				res.render('login_form', {
+					errors: 'Please log in to see list of assets.'
+				});
+				return;
+			}
+
+			// build an in memory object with the network configuration (also known as a connection profile)
+			const ccp = buildCCPOrg1();
+
+			// build an instance of the fabric ca services client based on
+			// the information in the network configuration
+			const caClient = buildCAClient(FabricCAServices, ccp, 'ca.org1.example.com');
+
+			// setup the wallet to hold the credentials of the application user
+			const wallet = await buildWallet(Wallets, walletPath);
+
+			// in a real application this would be done on an administrative flow, and only once
+			await enrollAdmin(caClient, wallet, mspOrg1);
+
+			// in a real application this would be done only when a new user was required to be added
+			// and would be part of an administrative flow
+			await registerAndEnrollUser(caClient, wallet, mspOrg1, org1UserId, 'org1.department1');
+
+			// Create a new gateway instance for interacting with the fabric network.
+			// In a real application this would be done as the backend server session is setup for
+			// a user that has been verified.
+			const gateway = new Gateway();
+
+			try {
+				// setup the gateway instance
+				// The user will now be able to create connections to the fabric network and be able to
+				// submit transactions and query. All transactions submitted by this gateway will be
+				// signed by this user using the credentials stored in the wallet.
+				await gateway.connect(ccp, {
+					wallet,
+					identity: org1UserId,
+					discovery: { enabled: true, asLocalhost: true } // using asLocalhost as this gateway is using a fabric network deployed locally
+				});
+
+				// Build a network instance based on the channel where the smart contract is deployed
+				const network = await gateway.getNetwork(channelName);
+
+				// Get the contract from the network.
+				const contract = network.getContract(chaincodeName);
+
+				// Let's try a query type operation (function).
+				// This will be sent to just one peer and the results will be shown.
+				console.log('\n--> Evaluate Transaction: GetAllAssets, function returns all the current assets on the ledger');
+				let result = await contract.evaluateTransaction('GetAllAssets');
+				console.log(`*** Result: ${prettyJSONString(result.toString())}`);
+
+				let data = result.toString();
+				console.log(data);
+				let data2 = [];
+				let label = [];
+				let values = [];
+				// remove {} [] "" from the fetched dataset
+				for (var i = 0; i < data.length; i++) {
+					if (data[i] != '{' && data[i] != '}' && data[i] != '{' && data[i] != '"' && data[i] != '[' && data[i] != ']') {
+						data2.push(data[i]);
+						//console.log(data[i]); // removes {} [] ""
+					}
+				}
+
+				// Get Labels (Appraised Value, address, id and so on)
+				let string;
+				let j;
+				for (var i = 0; i < data2.length; i++) {
+					string = '';
+					if (i == 0 || data2[i] == ',') {
+						// Eliminite the word 'Record' from the result
+						if (data2[i + 1] == 'R' && data2[i + 2] == 'e' && data2[i + 3] == 'c' && data2[i + 4] == 'o' && data2[i + 5] == 'r' && data2[i + 6] == 'd') {
+							i += 7;
+						}
+						if (i == 0) {
+							j = i;
+						}
+						else {
+							j = i + 1;
+						}
+						while (data2[j] != ':') {
+							string += data2[j];
+							j++;
+						}
+						label.push(string);
+						i = --j;
+						//console.log(string);
+					}
+				}
+				// Get Values (300, blue, asset1 and so on)
+				for (var i = 0; i < data2.length; i++) {
+					string = '';
+					if (data2[i] == ':') {
+						// Remove text 'x509::CN='
+						if (data2[i + 1] == 'x' && data2[i + 2] == '5' && data2[i + 3] == '0' && data2[i + 4] == '9' && data2[i + 5] == ':' && data2[i + 6] == ':' && data2[i + 7] == 'C' && data2[i + 8] == 'N' && data2[i + 9] == '=') {
+							i += 9;
+						}
+						// Remove text ':CN=ca.org1.example.com'
+						if (data2[i + 1] == ':' && data2[i + 2] == 'C' && data2[i + 3] == 'N' && data2[i + 4] == '=' && data2[i + 5] == 'c' && data2[i + 6] == 'a' && data2[i + 7] == '.' && data2[i + 8] == 'o' && data2[i + 9] == 'r' && data2[i + 10] == 'g' && data2[i + 11] == '1' && data2[i + 12] == '.' && data2[i + 13] == 'e' && data2[i + 14] == 'x' && data2[i + 15] == 'a' && data2[i + 16] == 'm' && data2[i + 17] == 'p' && data2[i + 18] == 'l' && data2[i + 19] == 'e' && data2[i + 20] == '.' && data2[i + 21] == 'c' && data2[i + 22] == 'o' && data2[i + 23] == 'm') {
+							i += 24;
+						}
+						// Remove O=org1.example.com
+						if (data2[i + 1] == 'O' && data2[i + 2] == '=' && data2[i + 3] == 'o' && data2[i + 4] == 'r' && data2[i + 5] == 'g' && data2[i + 6] == '1' && data2[i + 7] == '.' && data2[i + 8] == 'e' && data2[i + 9] == 'x' && data2[i + 10] == 'a' && data2[i + 11] == 'm' && data2[i + 12] == 'p' && data2[i + 13] == 'l' && data2[i + 14] == 'e' && data2[i + 15] == '.' && data2[i + 16] == 'c' && data2[i + 17] == 'o' && data2[i + 18] == 'm') {
+							i += 18;
+						}
+
+						j = i + 1;
+						while (data2[j] != ',') {
+							if (j == data2.length - 1) {
+								string += data2[j];
+								break;
+							}
+							string += data2[j];
+							j++;
+						}
+						if (string != '') {
+							values.push(string);
+						}
+						i = --j;
+						//console.log(string);
+					}
+				}
+				// Call display.ejs file to show the list of assets
+				// res.render('display', { layout: false });
+				res.render('my_lands', {
+					// layout: false,
+					label: label,
+					values: values,
+					username: org1UserId
+				});
+
+			} finally {
+				// Disconnect from the gateway when the application is closing
+				// This will close all connections to the network
+				gateway.disconnect();
+			}
+		} catch (error) {
+			console.error(`******** FAILED to run the application: ${error}`);
+		}
+	}
+	// main();
+});
+
 
 // Register Assests Form
 router.get('/insert_form', function (req, res) {
@@ -421,6 +632,162 @@ router.post('/create_asset', function (req, res) {
 	}
 });
 
+
+// Register Assets api for flutter into the blockchain
+router.post('/create_asset_api', function (req, res) {
+	console.log('Flutter Request called for adding new record');
+	let errors = [];
+	if (!req.body.id) {
+		errors.push('ID must be provided');
+	}
+	if (!req.body.size) {
+		errors.push('Land Size must be provided');
+	}
+	if (!req.body.value) {
+		errors.push('Price must be provided');
+	}
+	if (errors.length > 0) {
+		res.status(400).json({ errors: errors });
+	} else {
+		'use strict';
+
+		const { Gateway, Wallets } = require('fabric-network');
+		const FabricCAServices = require('fabric-ca-client');
+		const path = require('path');
+		const { buildCAClient, registerAndEnrollUser, enrollAdmin } = require('../../test-application/javascript/CAUtil.js');
+		const { buildCCPOrg1, buildWallet } = require('../../test-application/javascript/AppUtil.js');
+
+		const channelName = 'mychannel';
+		const chaincodeName = 'basic';
+		const mspOrg1 = 'Org1MSP';
+		const walletPath = path.join(__dirname, 'wallet');
+		const mysql = require('mysql');
+
+		const UserCnic = req.body.usercnic;
+		const District = req.body.district;
+		const Tehsil = req.body.tehsil;
+		const Mauza = req.body.mauza;
+		const Land_id = req.body.id;
+		const Land_price = req.body.value;
+		const Land_size = req.body.size;
+		const Khatuni = req.body.khatuni;
+		const Address = District.concat(" ", Tehsil, ' ', ' ', Mauza, ' ', Khatuni, ' ', 'Punjab', ' ', 'Pakistan');
+
+		const db = mysql.createConnection({
+			host: 'localhost',
+			user: 'root',
+			password: '',
+			database: 'test',
+		});
+
+		// connect to database
+		db.connect((err) => {
+			if (err) {
+				console.log(err);
+				res.status(500).json({ error: 'Database connection error' });
+			} else {
+				console.log('Connection done');
+				const post = {
+					user_cnic: UserCnic,
+					district: District,
+					tehsil: Tehsil,
+					mauza: Mauza,
+					khatuni: Khatuni,
+					land_id: Land_id,
+					land_size: Land_size,
+					land_price: Land_price
+				};
+
+				const checkQuery = "SELECT * FROM land_record WHERE khatuni = ?";
+				const checkValues = [Khatuni];
+				db.query(checkQuery, checkValues, (err, result) => {
+					if (err) {
+						console.log(err);
+						res.status(500).json({ error: 'Database query error' });
+					} else {
+						if (result.length === 0) {
+							const insertQuery = "INSERT INTO land_record SET ?";
+							db.query(insertQuery, post, (err, result) => {
+								if (err) {
+									console.log(err);
+									res.status(500).json({ error: 'Database insert error' });
+								} else {
+									console.log("Successfully added land record in the database");
+
+									// Perform the blockchain transaction here
+									db.connect(function (err) {
+										let sql = `SELECT * FROM user WHERE user_cnic= ${UserCnic}`;
+										let query = db.query(sql, async (err, result) => {
+											if (err) {
+												console.log("Data Not Found");
+											}
+											// console.log(result);
+											const fetchedResult = result;
+
+											const org1UserId = fetchedResult[0].username;
+
+											// Call a function or perform actions that rely on the fetched data
+											// eslint-disable-next-line no-use-before-define
+											// Call a function or perform actions that rely on the fetched data
+											main(org1UserId)
+												.then(() => {
+													res.status(200).json({ success: 'Asset created successfully' });
+												})
+												.catch((error) => {
+													console.error(`******** FAILED to run the application: ${error}`);
+													res.status(500).json({ error: 'Blockchain transaction failed' });
+												});
+										});
+									});
+
+
+
+								}
+							});
+						} else {
+							res.status(400).json({ error: 'Land record already exists' });
+						}
+					}
+				});
+			}
+		});
+
+		async function main(org1UserId) {
+			try {
+				if (org1UserId === undefined) {
+					throw new Error('Please log in to add a new record.');
+				}
+
+				const ccp = buildCCPOrg1();
+				const caClient = buildCAClient(FabricCAServices, ccp, 'ca.org1.example.com');
+				const wallet = await buildWallet(Wallets, walletPath);
+				await enrollAdmin(caClient, wallet, mspOrg1);
+				await registerAndEnrollUser(caClient, wallet, mspOrg1, org1UserId, 'org1.department1');
+				const gateway = new Gateway();
+
+				await gateway.connect(ccp, {
+					wallet,
+					identity: org1UserId,
+					discovery: { enabled: true, asLocalhost: true }
+				});
+
+				const network = await gateway.getNetwork(channelName);
+				const contract = network.getContract(chaincodeName);
+
+				console.log('\n--> Submit Transaction: CreateAsset, creates new asset with ID, address, owner, size, price, date, and type');
+				await contract.submitTransaction('CreateAsset', req.body.id, Address, req.body.size, org1UserId, req.body.value);
+
+				// Disconnect from the gateway when the application is closing
+				// This will close all connections to the network
+				gateway.disconnect();
+			} catch (error) {
+				throw new Error(`******** FAILED to run the application: ${error}`);
+			}
+		}
+	}
+});
+
+
 // Land Search Form
 router.get('/search_form', function (req, res) {
 	res.render('search_form', {
@@ -590,7 +957,8 @@ router.post('/search_asset', function (req, res) {
 
 						res.render('search_result', {
 							label: label,
-							values: values
+							values: values,
+							username: UserCnic
 						});
 					} finally {
 						// Disconnect from the gateway when the application is closing
@@ -1266,7 +1634,8 @@ router.post('/history', function (req, res) {
 					res.render('history', {
 						label: label,
 						values: owners,
-						date: dates
+						date: dates,
+						username: UserCnic
 					});
 
 				} finally {
@@ -1281,6 +1650,134 @@ router.post('/history', function (req, res) {
 		// main();
 	}
 });
+
+// Make history api for flutter
+router.post('/history_api', async function (req, res) {
+	console.log('Request Received From Flutter');
+	let errors = [];
+	if (!req.body.id) {
+	  errors.push('Asset ID must be provided');
+	}
+	if (errors.length > 0) {
+	  res.status(400).json({ errors: errors });
+	} else {
+	  try {
+		const { Gateway, Wallets } = require('fabric-network');
+		const FabricCAServices = require('fabric-ca-client');
+		const path = require('path');
+		const { buildCAClient, registerAndEnrollUser, enrollAdmin } = require('../../test-application/javascript/CAUtil.js');
+		const { buildCCPOrg1, buildWallet } = require('../../test-application/javascript/AppUtil.js');
+
+		const channelName = 'mychannel';
+		const chaincodeName = 'basic';
+		const mspOrg1 = 'Org1MSP';
+		const walletPath = path.join(__dirname, 'wallet');
+		const UserCnic = req.body.userid;
+		const mysql = require('mysql');
+
+		const db = mysql.createConnection({
+			host: 'localhost',
+			user: 'root',
+			password: '',
+			database: 'test',
+		});
+
+		// connect to database
+		db.connect((err) => {
+			if (err) {
+				console.log(err);
+			}
+			console.log('Connection done 3');
+		});
+		db.connect(function (err) {
+			let sql = `SELECT * FROM user WHERE user_cnic= ${UserCnic}`;
+			let query = db.query(sql, async (err, result) => {
+				if (err) {
+					console.log("Data Not Found");
+				}
+				// console.log(result);
+				const fetchedResult = result;
+
+				const org1UserId = fetchedResult[0].username;
+
+				// Call a function or perform actions that rely on the fetched data
+				// eslint-disable-next-line no-use-before-define
+				await main(org1UserId);
+			});
+		});
+
+		async function main(org1UserId) {
+		  try {
+			if (org1UserId === undefined) {
+			  res.status(401).json({ error: 'Please log in to see the history of an asset' });
+			  return;
+			}
+
+			// Build an in-memory object with the network configuration (also known as a connection profile)
+			const ccp = buildCCPOrg1();
+
+			// Build an instance of the Fabric CA services client based on the information in the network configuration
+			const caClient = buildCAClient(FabricCAServices, ccp, 'ca.org1.example.com');
+
+			// Setup the wallet to hold the credentials of the application user
+			const wallet = await buildWallet(Wallets, walletPath);
+
+			// In a real application, this would be done on an administrative flow, and only once
+			await enrollAdmin(caClient, wallet, mspOrg1);
+
+			// In a real application, this would be done only when a new user was required to be added
+			// and would be part of an administrative flow
+			await registerAndEnrollUser(caClient, wallet, mspOrg1, org1UserId, 'org1.department1');
+
+			// Create a new gateway instance for interacting with the fabric network
+			const gateway = new Gateway();
+
+			try {
+			  // Setup the gateway instance
+			  // The user will now be able to create connections to the fabric network and be able to
+			  // submit transactions and queries. All transactions submitted by this gateway will be
+			  // signed by this user using the credentials stored in the wallet.
+			  await gateway.connect(ccp, {
+				wallet,
+				identity: org1UserId,
+				discovery: { enabled: true, asLocalhost: true }, // using asLocalhost as this gateway is using a fabric network deployed locally
+			  });
+
+			  // Build a network instance based on the channel where the smart contract is deployed
+			  const network = await gateway.getNetwork(channelName);
+
+			  // Get the contract from the network
+			  const contract = network.getContract(chaincodeName);
+
+			  // Evaluate the transaction to get asset history
+			  console.log('\n--> Evaluate Transaction: GetAssetHistory, function returns all the current assets on the ledger');
+			  const result = await contract.evaluateTransaction('GetAssetHistory', req.body.id);
+			  console.log(`*** Result: ${result.toString()}`);
+
+			  const data = JSON.parse(result.toString());
+			  const owners = data.map(item => item.Owner);
+			  const dates = data.map(item => item.addedOn);
+
+			  res.status(200).json({ owners: owners, dates: dates });
+			} finally {
+			  // Disconnect from the gateway when the application is closing
+			  // This will close all connections to the network
+			  gateway.disconnect();
+			}
+		  } catch (error) {
+			console.error(`******** FAILED to run the application: ${error}`);
+			res.status(500).json({ error: 'An error occurred' });
+		  }
+		}
+	  } catch (error) {
+		console.error(`******** FAILED to run the application: ${error}`);
+		res.status(500).json({ error: 'An error occurred' });
+	  } finally {
+		// Close the database connection
+		console.log('');
+	  }
+	}
+  });
 
 // Login into the system
 router.get('/login_form', function (req, res) {

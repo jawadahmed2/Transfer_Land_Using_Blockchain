@@ -78,6 +78,17 @@
                   <a href="/display">All Assets</a>
                </li>
 
+               <% try { %>
+                  <% if (username !== 'Patwari') { %>
+                     <li>
+                          <a href="/display_mylands">My Registered Lands</a>
+                        </li>
+                  <% } %>
+              <% } catch (err) { %>
+                  <% // Handle the error, if any %>
+
+              <% } %>
+
                   <% try { %>
                      <% if (username !== 'Patwari') { %>
                         <li>
