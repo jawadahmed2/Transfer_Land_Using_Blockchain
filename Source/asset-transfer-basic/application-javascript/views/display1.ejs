@@ -126,15 +126,6 @@
 				var landID = button.closest('.feature_2').find('.mgt.bold').text().trim(); // Get the Land ID from the parent element
 				var landIDString = landID.toString();
 
-
-				// Check if the button was already clicked
-				var isButtonClicked = localStorage.getItem(landID);
-				if (isButtonClicked) {
-					button.text('Requested'); // Set the button text to "Requested"
-					button.attr('disabled', true); // Disable the button
-					return;
-				}
-
 				// Make AJAX request to post the Land ID to the server
 				$.ajax({
 					url: '/land_request', // Replace this with your server endpoint

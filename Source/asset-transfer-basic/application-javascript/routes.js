@@ -1061,18 +1061,28 @@ router.post('/update_owner', function (req, res) {
 			const doc = new PDFDocument();
 
 			// Create the PDF content
-			doc.font('Helvetica-Bold').fontSize(18).text('Govt Of Pakistan', { align: 'center' })
+			doc.fontSize(18).text('Govt Of Pakistan', { align: 'center' })
 				.text('Punjab Land Department', { align: 'center' });
+
+			doc.moveDown(); // Move down one line to add spacing between sections
 
 			doc.fontSize(14).text(`Certificate number: ${Math.floor(Math.random() * 10000) + 1}`);
 
 			// Heading with 18 font size and centered alignment
-			doc.font('Helvetica-Bold').fontSize(18).text('LAND MUTATION CERTIFICATE', { align: 'center' });
+			doc.font('Helvetica-Bold').fontSize(16).text('LAND MUTATION CERTIFICATE', { align: 'center' });
+
+			doc.moveDown(); // Move down one line to add spacing between sections
 
 			doc.fontSize(14)
-				.text(`This is to certify that the scheduled land requested by ${sellerName} is correctly mutated vide Mutation case No.${Math.floor(Math.random() * 10000) + 1} in the name of ${newownerName}`)
-				.text(`At present, the Land is under the peaceful possession of the new owner ${newownerName}`)
-				.text('Land Schedule')
+				.text(`This is to certify that the land with Land ID: ${LandId} has undergone a successful mutation process as per Mutation Case No. ${Math.floor(Math.random() * 10000) + 1}. The request for this mutation was made by ${sellerName}, and it has been officially transferred to the ownership of ${newownerName}.`)
+				.text(`As of the issuance of this certificate, the Land is now rightfully and peacefully possessed by its new owner, ${newownerName}. This mutation has been duly recorded and acknowledged in accordance with the regulations of the Punjab Land Department.`)
+				.moveDown()
+				.text('The Government of Pakistan Land Department is hereby authorized to execute and verify this land mutation process, ensuring its legality and adherence to the applicable laws and policies.')
+				.text('This certificate serves as a valid and official document affirming the legal transfer of ownership, and it must be treated with utmost significance in any related transactions or property dealings.');
+
+			doc.moveDown(); // Move down one line to add spacing between sections
+
+			doc.text('Land Schedule')
 				.text(`Land ID: ${LandId}`)
 				.text(`Mouza: ${mauza}`) // Add other land details here
 				.text(`Khatuni: ${khatuni}`)
@@ -1089,6 +1099,7 @@ router.post('/update_owner', function (req, res) {
 
 			console.log(`PDF generated and saved to ${pdfPath}`);
 		}
+
 
 
 		const db = mysql.createConnection({
@@ -2884,6 +2895,7 @@ router.get('/received_lands', function (req, res) {
 
 
 // User will make request for land transfer
+// User will make a request for land transfer
 router.post('/land_request', function (req, res) {
 	let errors = [];
 	if (!req.body.id) {
@@ -2893,13 +2905,11 @@ router.post('/land_request', function (req, res) {
 		res.render('display', {
 			errors: errors
 		});
-	}
-	else {
+	} else {
 		'use strict';
 
 		const mysql = require('mysql');
 		const LandId = req.body.id;
-
 
 		console.log(LandId);
 		const UserCnic = req.session.userid;
@@ -2910,7 +2920,7 @@ router.post('/land_request', function (req, res) {
 			password: '',
 			database: 'test',
 		});
-		// connect to database
+		// connect to the database
 		db.connect((err) => {
 			if (err) {
 				console.log(err);
@@ -2930,12 +2940,12 @@ router.post('/land_request', function (req, res) {
 			});
 		});
 
-
 		async function main(fetchedResult) {
 			try {
-
-				// console.log(fetchedResult);
-
+				// Check if fetchedResult contains any data and the user_cnic is not null
+				if (!Array.isArray(fetchedResult) || fetchedResult.length === 0 || !fetchedResult[0].user_cnic) {
+					console.log("Invalid fetchedResult data or user_cnic is null");
+				}
 				db.connect(function (err) {
 					let post = { land_id: LandId, seller_cnic: fetchedResult[0].user_cnic, buyer_cnic: UserCnic, status: 0 };
 					let checkQuery = "SELECT * FROM buyer_requests WHERE land_id = ?";
@@ -2961,19 +2971,14 @@ router.post('/land_request', function (req, res) {
 				});
 				res.status(200).json({ success: true });
 
-				// res.render('requested_lands', {
-				// 	errors: {}
-				// });
-
-
-
 			} catch (error) {
 				console.error(`******** FAILED to run the application: ${error}`);
+				res.status(500).json({ success: false, error: 'Error occurred during land request' });
 			}
 		}
-		// main();
 	}
 });
+
 
 
 // Land Request API for flutter
