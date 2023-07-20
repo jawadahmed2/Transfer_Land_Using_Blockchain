@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Land Display</title>
+	<link href="dashboard_stylesheet/css/bootstrap.min.css" rel="stylesheet">
+	<link href="dashboard_stylesheet/css/global.css" rel="stylesheet">
+	<link href="dashboard_stylesheet/css/listing.css" rel="stylesheet">
+	<link rel="stylesheet" type="text/css" href="dashboard_stylesheet/css/font-awesome.min.css" />
+	<link href="https://fonts.googleapis.com/css?family=Alata&display=swap" rel="stylesheet">
+	<script src="dashboard_stylesheet/js/jquery-2.1.1.min.js"></script>
+	<script src="dashboard_stylesheet/js/bootstrap.min.js"></script>
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+	<style>
+		/* Add margin and padding for cards */
+		.feature_2 {
+			margin-bottom: 20px;
+			padding: 5px;
+			border: 1px solid #ccc;
+			border-radius: 20px;
+			background-color: #f9f9f9;
+		}
+
+		.requestBtn {
+			background-color: #4CAF50;
+			color: white;
+			padding: 8px 16px;
+			border: none;
+			cursor: pointer;
+			border-radius: 4px;
+			text-align: center;
+		}
+
+		.requestBtn:hover {
+			background-color: #45a049;
+		}
+
+		/* Add flex properties to the row container */
+		.center_list_1l .row {
+			display: flex;
+			flex-wrap: wrap;
+			justify-content: space-between;
+		}
+
+		.username {
+			text-align: center;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="username">
+		<h4 style="color: rgb(0, 0, 0); font-weight: bold;" class="title">
+			Welcome <%= username %>
+		</h4>
+	</div>
+	<section id="center" class="center_list clearfix">
+		<div class="container">
+			<div class="row">
+				<div class="center_list_1 clearfix">
+					<div class="col-sm-9">
+						<div class="center_list_1l clearfix">
+							<div class="center_list_1li clearfix">
+								<h4 class="mgt head_1">All Available Properties</h4>
+							</div><br>
+							<% if (values && values.length> 0) { %>
+								<% let k=0 %>
+									<% for (let i=0; i < Math.floor(values.length / 7); i++) { %>
+										<% if (values[3 + k] !==username) { %>
+											<!-- Check if the current username is not equal to the username in the loop -->
+											<% if (i % 5===0) { %>
+												<!-- Start a new row for every five cards -->
+												<div class="row">
+													<% } %>
+														<div class="col-sm-6 space_left">
+															<div class="feature_2 clearfix">
+																<div class="feature_2im clearfix">
+																	<div class="feature_2im1 clearfix">
+																	</div>
+																</div>
+																<div class="feature_2m_last clearfix">
+																	<h4 class="mgt bold">Land ID: <%= values[1 + k] %>
+																	</h4>
+																	<p><i class="fa fa-map-marker"></i>
+																		<%= values[0 + k] %>
+																	</p><br>
+																	<h6><i class="fa fa-object-group col_1"></i>
+																		<%= values[2 + k] %> sq ft
+																	</h6><br>
+																	<h5 class="bold">Price = Rs. <%= values[4 + k] %>
+																	</h5>
+																	<div class="feature_2m_last_i clearfix">
+																		<i class="fa fa-user"></i>
+																		<%= values[3 + k] %> <br> <br>
+																			<button class="requestBtn">Request To
+																				Buy</button>
+																	</div>
+																</div>
+															</div>
+														</div>
+														<% if (i % 5===4 || i===Math.floor(values.length / 7) - 1) { %>
+															<!-- End the row for every five cards or if it's the last row -->
+												</div>
+												<% } %>
+													<% } %>
+														<% k=k + 7 %>
+															<% } %>
+																<% } %>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<script>
+		$(document).ready(function () {
+			// Handle button click event
+			$('.requestBtn').click(function () {
+				var button = $(this); // Store a reference to the button element
+				var landID = button.closest('.feature_2').find('.mgt.bold').text().trim(); // Get the Land ID from the parent element
+				var landIDString = landID.toString();
+
+
+				// Check if the button was already clicked
+				var isButtonClicked = localStorage.getItem(landID);
+				if (isButtonClicked) {
+					button.text('Requested'); // Set the button text to "Requested"
+					button.attr('disabled', true); // Disable the button
+					return;
+				}
+
+				// Make AJAX request to post the Land ID to the server
+				$.ajax({
+					url: '/land_request', // Replace this with your server endpoint
+					method: 'POST',
+					data: { id: landIDString },
+					success: function (response) {
+						console.log('ID value submitted successfully');
+						window.location.href = '/requested_lands'; // Redirect to the requested lands page
+
+						// Check the response from the server
+						if (response.success) {
+							button.text('Requested'); // Change button text using the stored reference
+							button.attr('disabled', true); // Disable the button to prevent further clicks
+							localStorage.setItem(landID, true); // Store the button click state in local storage
+						} else {
+							console.log('An error occurred: ', response.error);
+						}
+					},
+					error: function (xhr, status, error) {
+						console.log('An error occurred: ', error);
+					}
+				});
+			});
+		});
+	</script>
+</body>
+
+</html>

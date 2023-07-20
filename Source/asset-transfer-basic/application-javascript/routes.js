@@ -457,10 +457,41 @@ router.get('/display_mylands', function (req, res) {
 
 // Register Assests Form
 router.get('/insert_form', function (req, res) {
-	res.render('insert_form', {
-		errors: {},
-		success: {}
+	const mysql = require('mysql');
+	const UserCnic = req.session.userid;
+
+	const db = mysql.createConnection({
+		host: 'localhost',
+		user: 'root',
+		password: '',
+		database: 'test',
 	});
+	// connect to database
+	db.connect((err) => {
+		if (err) {
+			console.log(err);
+		}
+		console.log('Connection done insert form');
+	});
+	db.connect(function (err) {
+		let sql = `SELECT * FROM user WHERE user_cnic= ${UserCnic}`;
+		let query = db.query(sql, async (err, result) => {
+			if (err) {
+				console.log("Data Not Found");
+			}
+			// console.log(result);
+			const fetchedResult = result;
+
+			const org1UserId = fetchedResult[0].username;
+
+			res.render('insert_form', {
+				username: org1UserId,
+				errors: {},
+				success: {}
+			});
+		});
+	});
+
 });
 
 // Register Assets into the blockchain
@@ -987,6 +1018,8 @@ router.get('/update_owner_form', function (req, res) {
 	});
 });
 
+
+
 // Transfer ownership
 router.post('/update_owner', function (req, res) {
 	let errors = [];
@@ -1019,6 +1052,44 @@ router.post('/update_owner', function (req, res) {
 		const mysql = require('mysql');
 
 		const LandId = req.body.id;
+
+		const PDFDocument = require('pdfkit');
+		const fs = require('fs');
+
+
+		async function generateAndSavePDF(LandId, sellerName, newownerName, district, tehsil, mauza, khatuni, area, price) {
+			const doc = new PDFDocument();
+
+			// Create the PDF content
+			doc.font('Helvetica-Bold').fontSize(18).text('Govt Of Pakistan', { align: 'center' })
+				.text('Punjab Land Department', { align: 'center' });
+
+			doc.fontSize(14).text(`Certificate number: ${Math.floor(Math.random() * 10000) + 1}`);
+
+			// Heading with 18 font size and centered alignment
+			doc.font('Helvetica-Bold').fontSize(18).text('LAND MUTATION CERTIFICATE', { align: 'center' });
+
+			doc.fontSize(14)
+				.text(`This is to certify that the scheduled land requested by ${sellerName} is correctly mutated vide Mutation case No.${Math.floor(Math.random() * 10000) + 1} in the name of ${newownerName}`)
+				.text(`At present, the Land is under the peaceful possession of the new owner ${newownerName}`)
+				.text('Land Schedule')
+				.text(`Land ID: ${LandId}`)
+				.text(`Mouza: ${mauza}`) // Add other land details here
+				.text(`Khatuni: ${khatuni}`)
+				.text(`Tehsil: ${tehsil}`)
+				.text(`District: ${district}`)
+				.text('Province: Punjab')
+				.text(`Area: ${area}`)
+				.text(`Price: ${price}`);
+
+			// Save the PDF to a file
+			const pdfPath = `LandMutation/land_certificate_${LandId}.pdf`;
+			doc.pipe(fs.createWriteStream(pdfPath));
+			doc.end();
+
+			console.log(`PDF generated and saved to ${pdfPath}`);
+		}
+
 
 		const db = mysql.createConnection({
 			host: 'localhost',
@@ -1139,6 +1210,16 @@ router.post('/update_owner', function (req, res) {
 												console.log(err);
 											}
 											console.log("Successfully updated the user_cnic in the land_record table");
+										});
+
+										// Update user_cnic in land_record table
+										let get_land_details = `SELECT * FROM land_record WHERE land_id = '${LandId}'`;
+										db.query(get_land_details, (err, result) => {
+											if (err) {
+												console.log(err);
+											}
+											console.log("Successfully get land details");
+											generateAndSavePDF(LandId, org1UserId, req.body.newowner, result[0].district, result[0].tehsil, result[0].mauza, result[0].khatuni, result[0].land_size, result[0].land_price);
 										});
 
 									});
@@ -1656,128 +1737,128 @@ router.post('/history_api', async function (req, res) {
 	console.log('Request Received From Flutter');
 	let errors = [];
 	if (!req.body.id) {
-	  errors.push('Asset ID must be provided');
+		errors.push('Asset ID must be provided');
 	}
 	if (errors.length > 0) {
-	  res.status(400).json({ errors: errors });
+		res.status(400).json({ errors: errors });
 	} else {
-	  try {
-		const { Gateway, Wallets } = require('fabric-network');
-		const FabricCAServices = require('fabric-ca-client');
-		const path = require('path');
-		const { buildCAClient, registerAndEnrollUser, enrollAdmin } = require('../../test-application/javascript/CAUtil.js');
-		const { buildCCPOrg1, buildWallet } = require('../../test-application/javascript/AppUtil.js');
+		try {
+			const { Gateway, Wallets } = require('fabric-network');
+			const FabricCAServices = require('fabric-ca-client');
+			const path = require('path');
+			const { buildCAClient, registerAndEnrollUser, enrollAdmin } = require('../../test-application/javascript/CAUtil.js');
+			const { buildCCPOrg1, buildWallet } = require('../../test-application/javascript/AppUtil.js');
 
-		const channelName = 'mychannel';
-		const chaincodeName = 'basic';
-		const mspOrg1 = 'Org1MSP';
-		const walletPath = path.join(__dirname, 'wallet');
-		const UserCnic = req.body.userid;
-		const mysql = require('mysql');
+			const channelName = 'mychannel';
+			const chaincodeName = 'basic';
+			const mspOrg1 = 'Org1MSP';
+			const walletPath = path.join(__dirname, 'wallet');
+			const UserCnic = req.body.userid;
+			const mysql = require('mysql');
 
-		const db = mysql.createConnection({
-			host: 'localhost',
-			user: 'root',
-			password: '',
-			database: 'test',
-		});
-
-		// connect to database
-		db.connect((err) => {
-			if (err) {
-				console.log(err);
-			}
-			console.log('Connection done 3');
-		});
-		db.connect(function (err) {
-			let sql = `SELECT * FROM user WHERE user_cnic= ${UserCnic}`;
-			let query = db.query(sql, async (err, result) => {
-				if (err) {
-					console.log("Data Not Found");
-				}
-				// console.log(result);
-				const fetchedResult = result;
-
-				const org1UserId = fetchedResult[0].username;
-
-				// Call a function or perform actions that rely on the fetched data
-				// eslint-disable-next-line no-use-before-define
-				await main(org1UserId);
+			const db = mysql.createConnection({
+				host: 'localhost',
+				user: 'root',
+				password: '',
+				database: 'test',
 			});
-		});
 
-		async function main(org1UserId) {
-		  try {
-			if (org1UserId === undefined) {
-			  res.status(401).json({ error: 'Please log in to see the history of an asset' });
-			  return;
+			// connect to database
+			db.connect((err) => {
+				if (err) {
+					console.log(err);
+				}
+				console.log('Connection done 3');
+			});
+			db.connect(function (err) {
+				let sql = `SELECT * FROM user WHERE user_cnic= ${UserCnic}`;
+				let query = db.query(sql, async (err, result) => {
+					if (err) {
+						console.log("Data Not Found");
+					}
+					// console.log(result);
+					const fetchedResult = result;
+
+					const org1UserId = fetchedResult[0].username;
+
+					// Call a function or perform actions that rely on the fetched data
+					// eslint-disable-next-line no-use-before-define
+					await main(org1UserId);
+				});
+			});
+
+			async function main(org1UserId) {
+				try {
+					if (org1UserId === undefined) {
+						res.status(401).json({ error: 'Please log in to see the history of an asset' });
+						return;
+					}
+
+					// Build an in-memory object with the network configuration (also known as a connection profile)
+					const ccp = buildCCPOrg1();
+
+					// Build an instance of the Fabric CA services client based on the information in the network configuration
+					const caClient = buildCAClient(FabricCAServices, ccp, 'ca.org1.example.com');
+
+					// Setup the wallet to hold the credentials of the application user
+					const wallet = await buildWallet(Wallets, walletPath);
+
+					// In a real application, this would be done on an administrative flow, and only once
+					await enrollAdmin(caClient, wallet, mspOrg1);
+
+					// In a real application, this would be done only when a new user was required to be added
+					// and would be part of an administrative flow
+					await registerAndEnrollUser(caClient, wallet, mspOrg1, org1UserId, 'org1.department1');
+
+					// Create a new gateway instance for interacting with the fabric network
+					const gateway = new Gateway();
+
+					try {
+						// Setup the gateway instance
+						// The user will now be able to create connections to the fabric network and be able to
+						// submit transactions and queries. All transactions submitted by this gateway will be
+						// signed by this user using the credentials stored in the wallet.
+						await gateway.connect(ccp, {
+							wallet,
+							identity: org1UserId,
+							discovery: { enabled: true, asLocalhost: true }, // using asLocalhost as this gateway is using a fabric network deployed locally
+						});
+
+						// Build a network instance based on the channel where the smart contract is deployed
+						const network = await gateway.getNetwork(channelName);
+
+						// Get the contract from the network
+						const contract = network.getContract(chaincodeName);
+
+						// Evaluate the transaction to get asset history
+						console.log('\n--> Evaluate Transaction: GetAssetHistory, function returns all the current assets on the ledger');
+						const result = await contract.evaluateTransaction('GetAssetHistory', req.body.id);
+						console.log(`*** Result: ${result.toString()}`);
+
+						const data = JSON.parse(result.toString());
+						const owners = data.map(item => item.Owner);
+						const dates = data.map(item => item.addedOn);
+
+						res.status(200).json({ owners: owners, dates: dates });
+					} finally {
+						// Disconnect from the gateway when the application is closing
+						// This will close all connections to the network
+						gateway.disconnect();
+					}
+				} catch (error) {
+					console.error(`******** FAILED to run the application: ${error}`);
+					res.status(500).json({ error: 'An error occurred' });
+				}
 			}
-
-			// Build an in-memory object with the network configuration (also known as a connection profile)
-			const ccp = buildCCPOrg1();
-
-			// Build an instance of the Fabric CA services client based on the information in the network configuration
-			const caClient = buildCAClient(FabricCAServices, ccp, 'ca.org1.example.com');
-
-			// Setup the wallet to hold the credentials of the application user
-			const wallet = await buildWallet(Wallets, walletPath);
-
-			// In a real application, this would be done on an administrative flow, and only once
-			await enrollAdmin(caClient, wallet, mspOrg1);
-
-			// In a real application, this would be done only when a new user was required to be added
-			// and would be part of an administrative flow
-			await registerAndEnrollUser(caClient, wallet, mspOrg1, org1UserId, 'org1.department1');
-
-			// Create a new gateway instance for interacting with the fabric network
-			const gateway = new Gateway();
-
-			try {
-			  // Setup the gateway instance
-			  // The user will now be able to create connections to the fabric network and be able to
-			  // submit transactions and queries. All transactions submitted by this gateway will be
-			  // signed by this user using the credentials stored in the wallet.
-			  await gateway.connect(ccp, {
-				wallet,
-				identity: org1UserId,
-				discovery: { enabled: true, asLocalhost: true }, // using asLocalhost as this gateway is using a fabric network deployed locally
-			  });
-
-			  // Build a network instance based on the channel where the smart contract is deployed
-			  const network = await gateway.getNetwork(channelName);
-
-			  // Get the contract from the network
-			  const contract = network.getContract(chaincodeName);
-
-			  // Evaluate the transaction to get asset history
-			  console.log('\n--> Evaluate Transaction: GetAssetHistory, function returns all the current assets on the ledger');
-			  const result = await contract.evaluateTransaction('GetAssetHistory', req.body.id);
-			  console.log(`*** Result: ${result.toString()}`);
-
-			  const data = JSON.parse(result.toString());
-			  const owners = data.map(item => item.Owner);
-			  const dates = data.map(item => item.addedOn);
-
-			  res.status(200).json({ owners: owners, dates: dates });
-			} finally {
-			  // Disconnect from the gateway when the application is closing
-			  // This will close all connections to the network
-			  gateway.disconnect();
-			}
-		  } catch (error) {
+		} catch (error) {
 			console.error(`******** FAILED to run the application: ${error}`);
 			res.status(500).json({ error: 'An error occurred' });
-		  }
+		} finally {
+			// Close the database connection
+			console.log('');
 		}
-	  } catch (error) {
-		console.error(`******** FAILED to run the application: ${error}`);
-		res.status(500).json({ error: 'An error occurred' });
-	  } finally {
-		// Close the database connection
-		console.log('');
-	  }
 	}
-  });
+});
 
 // Login into the system
 router.get('/login_form', function (req, res) {
@@ -2801,6 +2882,7 @@ router.get('/received_lands', function (req, res) {
 });
 
 
+
 // User will make request for land transfer
 router.post('/land_request', function (req, res) {
 	let errors = [];
@@ -2892,6 +2974,7 @@ router.post('/land_request', function (req, res) {
 		// main();
 	}
 });
+
 
 // Land Request API for flutter
 router.post('/land_request_api', function (req, res) {

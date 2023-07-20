@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Land Display</title>
+    <link href="dashboard_stylesheet/css/bootstrap.min.css" rel="stylesheet">
+    <link href="dashboard_stylesheet/css/global.css" rel="stylesheet">
+    <link href="dashboard_stylesheet/css/listing.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="dashboard_stylesheet/css/font-awesome.min.css" />
+    <link href="https://fonts.googleapis.com/css?family=Alata&display=swap" rel="stylesheet">
+    <script src="dashboard_stylesheet/js/jquery-2.1.1.min.js"></script>
+    <script src="dashboard_stylesheet/js/bootstrap.min.js"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <style>
+        /* Add margin and padding for cards */
+        .feature_2 {
+            margin-bottom: 20px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            background-color: #f9f9f9;
+        }
+
+        .requestBtn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .requestBtn:hover {
+            background-color: #45a049;
+        }
+
+        /* Add flex properties to the row container */
+        .center_list_1l .row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+
+        .username {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <section id="center" class="center_list clearfix">
+        <div class="username">
+            <h4 style="color: rgb(0, 0, 0); font-weight: bold;" class="title">
+                Welcome <%= username %>
+            </h4>
+        </div>
+        <div class="container">
+            <div class="row">
+                <div class="center_list_1 clearfix">
+                    <div class="col-sm-9">
+                        <div class="center_list_1l clearfix">
+                            <div class="center_list_1li clearfix">
+                                <h4 class="mgt head_1">All Available Properties</h4>
+                            </div><br>
+                            <% if (values && values.length> 0) { %>
+                                <% let k=0 %>
+                                    <% for (let i=0; i < Math.floor(values.length / 7); i +=2) { %>
+                                        <!-- Start a new row for every two cards -->
+                                        <div class="row">
+                                            <div class="col-sm-6 space_left">
+                                                <div class="feature_2 clearfix">
+                                                    <div class="feature_2im clearfix">
+                                                        <div class="feature_2im1 clearfix">
+                                                        </div>
+                                                    </div>
+                                                    <div class="feature_2m_last clearfix">
+                                                        <h4 class="mgt bold">Land ID: <%= values[1 + k] %>
+                                                        </h4>
+                                                        <p><i class="fa fa-map-marker"></i>
+                                                            <%= values[0 + k] %>
+                                                        </p><br>
+                                                        <h6><i class="fa fa-object-group col_1"></i>
+                                                            <%= values[2 + k] %> sq ft
+                                                        </h6><br>
+                                                        <h5 class="bold">Price = Rs. <%= values[4 + k] %>
+                                                        </h5>
+                                                        <div class="feature_2m_last_i clearfix">
+                                                            <i class="fa fa-user"></i>
+                                                            <%= values[3 + k] %> <br> <br>
+                                                                <button class="requestBtn">Verified</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <% if (i + 1 < Math.floor(values.length / 7)) { %>
+                                                <!-- Add another card if it exists -->
+                                                <div class="col-sm-6 space_left">
+                                                    <div class="feature_2 clearfix">
+                                                        <div class="feature_2im clearfix">
+                                                            <div class="feature_2im1 clearfix">
+                                                            </div>
+                                                        </div>
+                                                        <div class="feature_2m_last clearfix">
+                                                            <h4 class="mgt bold">Land ID: <%= values[1 + k + 7] %>
+                                                            </h4>
+                                                            <p><i class="fa fa-map-marker"></i>
+                                                                <%= values[0 + k + 7] %>
+                                                            </p><br>
+                                                            <h6><i class="fa fa-object-group col_1"></i>
+                                                                <%= values[2 + k + 7] %> sq ft
+                                                            </h6><br>
+                                                            <h5 class="bold">Price = Rs. <%= values[4 + k + 7] %>
+                                                            </h5>
+                                                            <div class="feature_2m_last_i clearfix">
+                                                                <i class="fa fa-user"></i>
+                                                                <%= values[3 + k + 7] %> <br> <br>
+                                                                    <button class="requestBtn">Verified</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <% } %>
+                                        </div>
+                                        <% k=k + 14 %>
+                                            <% } %>
+                                                <% } %>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+
+</html>
