@@ -1019,7 +1019,6 @@ router.get('/update_owner_form', function (req, res) {
 });
 
 
-
 // Transfer ownership
 router.post('/update_owner', function (req, res) {
 	let errors = [];
@@ -1265,6 +1264,182 @@ router.post('/update_owner', function (req, res) {
 	}
 });
 
+
+// Fard Generation
+router.post('/land_fard', function (req, res) {
+	console.log('Fard Generation Requested');
+	let errors = [];
+	if (!req.body.id) {
+		errors.push('Asset ID must be provided');
+	}
+	if (!req.body.owner_name) {
+		errors.push('Owner name must be provided');
+	}
+	else {
+		'use strict';
+
+		const mysql = require('mysql');
+		const LandId = req.body.id;
+		const PDFDocument = require('pdfkit');
+		const fs = require('fs');
+		const nodemailer = require('nodemailer');
+
+
+		// Function to generate and save the Fard PDF
+		async function generateAndSavePDF(LandId, ownerName, district, tehsil, mauza, khatuni, area, price) {
+			const doc = new PDFDocument();
+
+			// Create the PDF content
+			doc.fontSize(18).text('Govt Of Pakistan', { align: 'center' })
+				.text('Punjab Land Department', { align: 'center' });
+
+			doc.moveDown(); // Move down one line to add spacing between sections
+
+			doc.fontSize(14).text(`Certificate number: ${Math.floor(Math.random() * 10000) + 1}`);
+
+			// Heading with 18 font size and centered alignment
+			doc.font('Helvetica-Bold').fontSize(16).text('LAND OWNERSHIP CERTIFICATE', { align: 'center' });
+
+			doc.moveDown(); // Move down one line to add spacing between sections
+
+			// Custom message for land mutation certification
+			doc.fontSize(14)
+				.text(`This certificate is to certify that ${ownerName} is the sole owner of the land located at ${mauza}, ${khatuni}, ${tehsil}, ${district}, Punjab, Pakistan. The land is ${area} acres in size and is free from any encumbrances.`)
+
+				.moveDown()
+				.text('The Government of Pakistan Land Department is hereby authorized to execute and verify this land certificate process, ensuring its legality and adherence to the applicable laws and policies.');
+
+			doc.moveDown(); // Move down one line to add spacing between sections
+
+			// Land details
+			doc.text('Land Details')
+				.text(`Land ID: ${LandId}`)
+				.text(`Mouza: ${mauza}`) // Add other land details here
+				.text(`Khatuni: ${khatuni}`)
+				.text(`Tehsil: ${tehsil}`)
+				.text(`District: ${district}`)
+				.text('Province: Punjab')
+				.text(`Area: ${area}`)
+				.text(`Price: ${price}`);
+
+			// Save the PDF to a file
+			const pdfPath = `FardGenerated/fard_document_${LandId}.pdf`;
+			doc.pipe(fs.createWriteStream(pdfPath));
+			doc.end();
+
+			console.log(`PDF generated and saved to ${pdfPath}`);
+		}
+
+		// Function to send email with the PDF attachment
+		function sendEmailWithAttachment(emailAddress, landId) {
+			// Create a nodemailer transporter
+			const transporter = nodemailer.createTransport({
+				host: 'smtp.googlemail.com',
+				port: 587,
+				secure: false,
+				auth: {
+					user: 'asadlahorikhan@gmail.com', // Replace with your email address
+					pass: 'voncenftdyholctz', // Replace with your email password
+				},
+			});
+
+			// Setup email data with attachments
+
+			const mailOptions = {
+				from: 'asadlahorikhan@gmail.com', // Replace with your email address
+				to: emailAddress, // Email address of the recipient
+				subject: 'Land Ownership Certificate', // Email subject
+				text: 'Dear land owner, please find attached your land ownership certificate.', // Email body text
+				attachments: [
+					{
+						filename: `fard_document_${landId}.pdf`, // Filename of the attached PDF
+						path: `FardGenerated/fard_document_${landId}.pdf`, // Path of the generated PDF
+					},
+				],
+			};
+
+			// Send email with defined transport object
+			transporter.sendMail(mailOptions, (error, info) => {
+				if (error) {
+					console.log('Error sending email: ', error);
+				} else {
+					console.log('Email sent successfully: ', info.response);
+					// Send a success response back to the client
+					res.status(200).json({ success: true });
+				}
+			});
+		}
+
+		const db = mysql.createConnection({
+			host: 'localhost',
+			user: 'root',
+			password: '',
+			database: 'test',
+		});
+
+		// Connect to the database
+		db.connect(async (err) => {
+			if (err) {
+				console.log(err);
+			}
+			console.log('Connection done fard');
+
+			const org1UserOwner = req.body.owner_name;
+			await main(org1UserOwner);
+		});
+
+		async function main(org1UserId) {
+			try {
+				// Fetch land details from the database
+				db.connect(function (err) {
+					let get_land_details = `SELECT * FROM land_record WHERE land_id = '${LandId}'`;
+					db.query(get_land_details, (err, result) => {
+						if (err) {
+							console.log(err);
+						}
+
+						// Check if the result is not null and contains the required data
+						if (result && result.length > 0) {
+							console.log("Successfully get land details");
+							generateAndSavePDF(LandId, org1UserId, result[0].district, result[0].tehsil, result[0].mauza, result[0].khatuni, result[0].land_size, result[0].land_price);
+
+							// Send a success response back to the client
+							res.status(200).json({ success: true });
+						} else {
+							console.log("Land details not found");
+							// Send an error response back to the client
+							res.status(400).json({ success: false, error: 'Land details not found' });
+						}
+						let get_email = `SELECT email_address FROM user WHERE username = '${org1UserId}'`;
+						db.query(get_email, (err, result) => {
+							if (err) {
+								console.log(err);
+							}
+							if (result && result.length > 0) {
+								console.log("Successfully get user email address");
+								const userEmail = result[0].email_address;
+								console.log("User Email Address: ", userEmail);
+
+								// Send email with the PDF attachment
+								sendEmailWithAttachment(userEmail, LandId);
+
+							} else {
+								console.log("Email Address not found");
+							}
+						});
+					});
+				});
+			} catch (error) {
+				console.error(`******** FAILED to run the application: ${error}`);
+				// Send an error response back to the client
+				res.status(500).json({ success: false, error: 'Failed to run the application' });
+			}
+		}
+	}
+});
+
+
+
 router.get('/register_user_form', function (req, res) {
 	res.render('register_user_form', {
 		errors: {},
@@ -1331,7 +1506,8 @@ router.post('/register_user', function (req, res) {
 				const context = {
 					UserId: req.body.userId,
 					UserPassword: req.body.password,
-					UserCnic: req.body.cnic
+					UserCnic: req.body.cnic,
+					UserEmail: req.body.email
 				};
 				res.redirect('/register_new_user_form?context=' + JSON.stringify(context));
 			}, 800);
@@ -1439,7 +1615,53 @@ router.get('/register_new_user_form', function (req, res) {
 	const org1UserId = context.UserId;
 	const userPassword = context.UserPassword;
 	const userCnic = context.UserCnic;
-	console.log(org1UserId, userPassword, userCnic);
+	const userEmail = context.UserEmail;
+	const nodemailer = require('nodemailer');
+	console.log(org1UserId, userPassword, userCnic, userEmail);
+
+	// Function to send email with login credentials
+	function sendEmailWithCredentials(emailAddress, org1UserId, userCnic, privateKey) {
+		// Create a nodemailer transporter
+		const transporter = nodemailer.createTransport({
+			host: 'smtp.googlemail.com',
+			port: 587,
+			secure: false,
+			auth: {
+				user: 'asadlahorikhan@gmail.com', // Replace with your email address
+				pass: 'voncenftdyholctz', // Replace with your email password
+			},
+		});
+
+		// Setup email data with credentials
+		const mailOptions = {
+			from: 'asadlahorikhan@gmail.com', // Replace with your email address
+			to: emailAddress, // Email address of the recipient
+			subject: 'LRMS Login Credentials', // Email subject
+			text: `Dear User,
+
+	  Below are your login credentials for the land record management system:
+
+	  Username: ${org1UserId}
+	  User CNIC: ${userCnic}
+	  System Private Key: ${privateKey}
+
+	  Please keep these credentials secure and do not share them with anyone.
+
+	  Best regards,
+	  Land Record Management System`, // Email body text
+		};
+
+		// Send email with defined transport object
+		transporter.sendMail(mailOptions, (error, info) => {
+			if (error) {
+				console.log('Error sending email: ', error);
+			} else {
+				console.log('Email sent successfully: ', info.response);
+				// Send a success response back to the client
+				res.status(200).json({ success: true });
+			}
+		});
+	}
 
 
 
@@ -1498,7 +1720,7 @@ router.get('/register_new_user_form', function (req, res) {
 					console.log('Connection done');
 				});
 				db.connect(function (err) {
-					let post = { private_key: privateKey, username: org1UserId, user_cnic: userCnic, password: userPassword };
+					let post = { private_key: privateKey, username: org1UserId, user_cnic: userCnic, password: userPassword, email_address: userEmail };
 					let checkQuery = "SELECT * FROM user WHERE private_key = ?";
 					let checkValues = [privateKey];
 					let query = db.query(checkQuery, checkValues, (err, result) => {
@@ -1513,6 +1735,8 @@ router.get('/register_new_user_form', function (req, res) {
 									console.log(err);
 								}
 								console.log("Successfully private key is added in the database");
+								// Send email with the PDF attachment
+								sendEmailWithCredentials(userEmail, org1UserId, userCnic, privateKey);
 								// res.send("Post 1 added");
 							});
 						} else {
@@ -2549,7 +2773,6 @@ router.post('/login_api', function (req, res) {
 
 	main();
 });
-
 
 
 

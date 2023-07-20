@@ -8,21 +8,20 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
     <style>
-        .availableTextBtn {
-          background-color: transparent;
-          color: #4CAF50;
-          padding: 8px 16px;
-          border: none;
-          cursor: pointer;
-          border-radius: 4px;
-          text-align: center;
-          text-decoration: underline;
+        .requestBtn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            text-align: center;
         }
 
-        .availableTextBtn:hover {
-          color: #45a049;
+        .requestBtn:hover {
+            background-color: #45a049;
         }
-      </style>
+    </style>
 
 </head>
 
@@ -35,7 +34,7 @@
     </div>
 
     <h1 style="color: blue; font-weight: bold;" class="title">
-       My Registered Lands
+        My Registered Lands
     </h1>
 
     <%# Tabular Display%>
@@ -59,7 +58,7 @@
                         <% if (values && values.length> 0) { %>
                             <% let k=0 %>
                                 <% for (let i=0; i < Math.floor(values.length / 7); i++) { %>
-                                    <% if (values[3 + k] ===username) { %>
+                                    <% if (values[3 + k]===username) { %>
                                         <!-- Check if the current username is not equal to the username in the loop -->
                                         <tr>
                                             <td>
@@ -81,7 +80,7 @@
                                                 <%= values[5 + k] %>
                                             </td>
                                             <td>
-                                                <a disabled class="availableTextBtn">Available To Sell</a>
+                                                <a class="requestBtn">Request For Fard</a>
                                                 <!-- <%= values[6 + k] %> -->
                                             </td>
                                         </tr>
@@ -90,14 +89,10 @@
                                                 <% } %>
                                                     <% } %>
                     </tbody>
-
-
-
                 </table>
             </div>
         </center>
         <br><br>
-
 
         <script>
             $(document).ready(function () {
@@ -105,30 +100,24 @@
                 $('.requestBtn').click(function () {
                     var button = $(this); // Store a reference to the button element
                     var id = button.closest('tr').find('td:eq(0)').text().trim(); // Remove spaces from the ID value
-                    console.log(id);
-
-                    // Check if the button was already clicked
-                    var isButtonClicked = localStorage.getItem(id);
-                    if (isButtonClicked) {
-                        button.text('Requested'); // Set the button text to "Requested"
-                        button.attr('disabled', true); // Disable the button
-                        return;
-                    }
+                    var name = $(this).closest('tr').find('td:eq(1)').text().trim(); // Remove spaces from the owner name value
+                    console.log(id, name);
 
                     // Make AJAX request to post the ID value to the Node.js Express function
                     $.ajax({
-                        url: '/land_request',
+                        url: '/land_fard',
                         method: 'POST',
-                        data: { id: id },
+                        data: { id: id, owner_name: name },
                         success: function (response) {
                             console.log('ID value submitted successfully');
-                            window.location.href = '/requested_lands';
-
                             // Check the response from the server
                             if (response.success) {
+
                                 button.text('Requested'); // Change button text using the stored reference
                                 button.attr('disabled', true); // Disable the button to prevent further clicks
                                 localStorage.setItem(id, true); // Store the button click state in local storage
+                                // Show an alert on successful Fard generation request
+                                alert('Fard Generation Request Made Successfully');
                             } else {
                                 console.log('An error occurred: ', response.error);
                             }
@@ -140,8 +129,6 @@
                 });
             });
         </script>
-
-
 
 </body>
 
