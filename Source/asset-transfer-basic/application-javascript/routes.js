@@ -22,14 +22,6 @@ const { NONE } = require('fabric-network/lib/impl/event/defaulteventhandlerstrat
 const router = express.Router();
 router.use(express.urlencoded({ extended: true }));
 
-// The router object is used in web applications to handle requests.
-// router.post() refers to POST requests and router.get() referes to GET request.
-// The difference between the two is that a GET request, is requesting data from a specified source and a POST
-// request submits data to a specified resource to be processed.
-// For example when you load a sign up page, that is a GET request as you are requesting data from the server
-// and when you submit that form it's a POST request as your inputted data will be processed and assorted into
-// a database, etc.
-
 
 // Display Registered Assets into the blockchain
 router.get('/display', function (req, res) {
@@ -1054,6 +1046,48 @@ router.post('/update_owner', function (req, res) {
 
 		const PDFDocument = require('pdfkit');
 		const fs = require('fs');
+		const nodemailer = require('nodemailer');
+
+
+		// Function to send email with the PDF attachment
+		function sendEmailWithAttachment(emailAddress, landId) {
+			// Create a nodemailer transporter
+			const transporter = nodemailer.createTransport({
+				host: 'smtp.googlemail.com',
+				port: 587,
+				secure: false,
+				auth: {
+					user: 'asadlahorikhan@gmail.com', // Replace with your email address
+					pass: 'voncenftdyholctz', // Replace with your email password
+				},
+			});
+
+			// Setup email data with attachments
+
+			const mailOptions = {
+				from: 'asadlahorikhan@gmail.com', // Replace with your email address
+				to: emailAddress, // Email address of the recipient
+				subject: 'Land Mutation Certificate', // Email subject
+				text: 'Dear user, please find attached your land mutation certificate.', // Email body text
+				attachments: [
+					{
+						filename: `mutation_document_${landId}.pdf`, // Filename of the attached PDF
+						path: `LandMutation/fard_document_${landId}.pdf`, // Path of the generated PDF
+					},
+				],
+			};
+
+			// Send email with defined transport object
+			transporter.sendMail(mailOptions, (error, info) => {
+				if (error) {
+					console.log('Error sending email: ', error);
+				} else {
+					console.log('Email sent successfully: ', info.response);
+					// Send a success response back to the client
+					res.status(200).json({ success: true });
+				}
+			});
+		}
 
 
 		async function generateAndSavePDF(LandId, sellerName, newownerName, district, tehsil, mauza, khatuni, area, price) {
@@ -1231,6 +1265,8 @@ router.post('/update_owner', function (req, res) {
 											console.log("Successfully get land details");
 											generateAndSavePDF(LandId, org1UserId, req.body.newowner, result[0].district, result[0].tehsil, result[0].mauza, result[0].khatuni, result[0].land_size, result[0].land_price);
 										});
+
+										sendEmailWithAttachment(fetchedResult[0].buyer_email, LandId);
 
 									});
 								});
